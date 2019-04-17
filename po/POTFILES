@@ -1,0 +1,4 @@
+data/nesbrasa.nesbrasa.emu.desktop.in
+data/nesbrasa.nesbrasa.emu.appdata.xml.in
+data/nesbrasa.nesbrasa.emu.gschema.xml
+src/nesbrasa-gtk-window.ui
