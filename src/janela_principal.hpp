@@ -18,22 +18,28 @@
 
 #pragma once
 
+#include <string>
 #include <gtkmm/builder.h>
 #include <gtkmm/menubar.h>
 #include <gtkmm/label.h>
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
 
+using std::string;
+
 namespace nesbrasa::gui
 {
     class JanelaPrincipal : public Gtk::Window
     {
     private:
+        static const string RECURSO_CAMINHO;
+
 	    Gtk::Box   *raiz;
 	    Gtk::Label *label;
+        
 	    Glib::RefPtr<Gtk::Builder> builder;
 
     public:
-      JanelaPrincipal();
+        JanelaPrincipal();
     };
 }

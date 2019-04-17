@@ -20,18 +20,20 @@
 
 namespace nesbrasa::gui
 {
+    const string JanelaPrincipal::RECURSO_CAMINHO = "/nesbrasa/nesbrasa/emu/janela_principal.ui";
+
     JanelaPrincipal::JanelaPrincipal():
         Glib::ObjectBase("JanelaPrincipal")
     {
-	    this->builder = Gtk::Builder::create_from_resource("/nesbrasa/nesbrasa/emu/janela_principal.ui");
-	    this->builder->get_widget("raiz", this->raiz);
-	    this->builder->get_widget("label", this->label);
+        this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
+        this->builder->get_widget("raiz", this->raiz);
+        this->builder->get_widget("label", this->label);
 
-	    this->add(*this->raiz);
+        this->add(*this->raiz);
 
-	    this->raiz->show();
-	    this->label->show();
+        this->raiz->show();
+        this->label->show();
 
-	    this->set_title("Nesbrasa");
+        this->set_title("Nesbrasa");
     }
 }

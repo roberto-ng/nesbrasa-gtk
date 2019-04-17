@@ -24,30 +24,30 @@ using namespace nesbrasa::gui;
 
 static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
 {
-	auto janela = app->get_active_window();
+    auto janela = app->get_active_window();
 
-	if (janela == nullptr)
+    if (janela == nullptr)
 	{
-	    // criar janela
-		janela = new JanelaPrincipal();
-		janela->property_application() = app;
-		janela->property_default_width() = 600;
-		janela->property_default_height() = 300;
+        // criar janela
+        janela = new JanelaPrincipal();
+        janela->property_application() = app;
+	    janela->property_default_width() = 600;
+	    janela->property_default_height() = 300;
 
-		app->add_window(*janela);
+        app->add_window(*janela);
 	}
 
-	janela->present();
+    janela->present();
 }
 
 int main(int argc, char *argv[])
 {
-	Glib::RefPtr<Gtk::Application> app =
-		Gtk::Application::create("nesbrasa.nesbrasa.emu", Gio::APPLICATION_FLAGS_NONE);
+    Glib::RefPtr<Gtk::Application> app =
+	    Gtk::Application::create("nesbrasa.nesbrasa.emu", Gio::APPLICATION_FLAGS_NONE);
 
-	app->signal_activate().connect(sigc::bind(&ao_ativar, app));
+    app->signal_activate().connect(sigc::bind(&ao_ativar, app));
 
-	int ret = app->run(argc, argv);
+    int ret = app->run(argc, argv);
 
-	return ret;
+    return ret;
 }
