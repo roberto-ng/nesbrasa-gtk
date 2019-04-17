@@ -16,16 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gtkmm/object.h>
+
 #include "janela_principal.hpp"
 
 using namespace nesbrasa::gui;
 
 static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
 {
-	Gtk::Window *janela = app->get_active_window();
+	auto janela = app->get_active_window();
 
 	if (janela == nullptr)
 	{
+	    // criar janela
 		janela = new JanelaPrincipal();
 		janela->property_application() = app;
 		janela->property_default_width() = 600;
