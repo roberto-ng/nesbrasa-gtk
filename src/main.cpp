@@ -16,11 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #include <gtkmm/object.h>
+#include <gtkmm/settings.h>
 
 #include "janela_principal.hpp"
 
 using namespace nesbrasa::gui;
+
+static const string APP_ID = "nesbrasa.nesbrasa.emu";
 
 static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
 {
@@ -42,8 +49,19 @@ static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
 
 int main(int argc, char *argv[])
 {
-    Glib::RefPtr<Gtk::Application> app =
-	    Gtk::Application::create("nesbrasa.nesbrasa.emu", Gio::APPLICATION_FLAGS_NONE);
+#if defined(_WIN32)
+    // usar a barra de janela padrão do windows
+    SetEnvironmentVariable ("GTK_CSD", "0");
+
+    auto tela = Gdk::Screen::get_default();    
+    if (tela)
+    {
+        // usar tema padrão do windows
+        Gtk::Settings::get_for_screen(tela)->property_gtk_theme_name() = "win32";
+    }
+#endif
+
+    auto app = Gtk::Application::create(APP_ID, Gio::APPLICATION_FLAGS_NONE);
 
     app->signal_activate().connect(sigc::bind(&ao_ativar, app));
 
