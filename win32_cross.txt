@@ -6,7 +6,6 @@ strip = '/usr/bin/i686-w64-mingw32-strip'
 pkgconfig = '/usr/bin/i686-w64-mingw32-pkg-config'
 exe_wrapper = 'wine'
 
-
 [host_machine]
 system = 'windows'
 cpu_family = 'x86'

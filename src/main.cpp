@@ -20,6 +20,7 @@
 #include <windows.h>
 #endif
 
+#include <iostream>
 #include <gtkmm/object.h>
 #include <gtkmm/settings.h>
 
@@ -44,28 +45,26 @@ static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
         app->add_window(*janela);
 	}
 
+#if defined(_WIN32)
+    // usar a barra de janela padrão do windows
+    SetEnvironmentVariable("GTK_CSD", "0");
+
+    auto tela = Gdk::Screen::get_default();    
+    if (tela.get() != nullptr)
+    {
+        // usar tema padrão do windows
+        auto configuracao = Gtk::Settings::get_for_screen(tela);
+        configuracao->property_gtk_theme_name() = "win32";
+    }
+#endif
+
     janela->present();
 }
 
 int main(int argc, char *argv[])
 {
-#if defined(_WIN32)
-    // usar a barra de janela padrão do windows
-    SetEnvironmentVariable ("GTK_CSD", "0");
-
-    auto tela = Gdk::Screen::get_default();    
-    if (tela)
-    {
-        // usar tema padrão do windows
-        Gtk::Settings::get_for_screen(tela)->property_gtk_theme_name() = "win32";
-    }
-#endif
-
     auto app = Gtk::Application::create(APP_ID, Gio::APPLICATION_FLAGS_NONE);
-
     app->signal_activate().connect(sigc::bind(&ao_ativar, app));
 
-    int ret = app->run(argc, argv);
-
-    return ret;
+    return app->run(argc, argv);
 }

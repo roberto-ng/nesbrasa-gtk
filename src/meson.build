@@ -9,6 +9,13 @@ nesbrasa_gtk_deps = [
 
 gnome = import('gnome')
 
+ldflags = []
+
+if host_machine.system() == 'windows'
+  cc = meson.get_compiler('c')
+  ldflags = cc.get_supported_link_arguments('-Wl,-subsystem,windows')
+endif
+
 nesbrasa_gtk_sources += gnome.compile_resources('nesbrasa-gtk-resources',
   'nesbrasa-gtk.gresource.xml',
   c_name: 'nesbrasa_gtk'
@@ -16,5 +23,6 @@ nesbrasa_gtk_sources += gnome.compile_resources('nesbrasa-gtk-resources',
 
 executable('nesbrasa-gtk', nesbrasa_gtk_sources,
   dependencies: nesbrasa_gtk_deps,
+  link_args: ldflags,
   install: true,
 )
