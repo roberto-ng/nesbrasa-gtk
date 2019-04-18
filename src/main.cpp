@@ -35,15 +35,15 @@ static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
     auto janela = app->get_active_window();
 
     if (janela == nullptr)
-	{
+    {
         // criar janela
         janela = new JanelaPrincipal();
         janela->property_application() = app;
-	    janela->property_default_width() = 600;
-	    janela->property_default_height() = 300;
+        janela->property_default_width() = 600;
+        janela->property_default_height() = 300;
 
         app->add_window(*janela);
-	}
+    }
 
 #if defined(_WIN32)
     // usar a barra de janela padrão do windows
