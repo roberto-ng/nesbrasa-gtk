@@ -22,6 +22,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/headerbar.h>
 #include <gtkmm/menubar.h>
+#include <gtkmm/menuitem.h>
 #include <gtkmm/label.h>
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
@@ -41,10 +42,16 @@ namespace nesbrasa::gui
         Gtk::Label*     label;
         Gtk::HeaderBar* headerbar;
         Gtk::MenuBar*   barra_menu;
+        Gtk::MenuItem*  menu_item_sair;
+        Gtk::MenuItem*  barra_mi_sair;
         
         Glib::RefPtr<Gtk::Builder> builder;
 
     public:
         JanelaPrincipal();
+
+        // sinais
+        
+        void ao_clicar_menu_item_sair();
     };
 }

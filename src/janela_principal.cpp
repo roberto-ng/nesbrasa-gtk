@@ -16,6 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gtkmm/object.h>
+#include <gtkmm/main.h>
+
 #include "janela_principal.hpp"
 
 namespace nesbrasa::gui
@@ -32,6 +35,8 @@ namespace nesbrasa::gui
         this->builder->get_widget("label", this->label);
         this->builder->get_widget("headerbar", this->headerbar);
         this->builder->get_widget("barra_menu", this->barra_menu);
+        this->builder->get_widget("menu_item_sair", this->menu_item_sair);
+        this->builder->get_widget("barra_mi_sair", this->barra_mi_sair);
 
         this->add(*this->raiz);
 
@@ -52,5 +57,19 @@ namespace nesbrasa::gui
         this->property_height_request() = LARGURA;
         this->property_default_width() = ALTURA;
         this->property_width_request() = ALTURA;
+
+        // conectar sinais de eventos
+
+        this->menu_item_sair->signal_activate()
+            .connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_menu_item_sair));
+
+        this->barra_mi_sair->signal_activate()
+            .connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_menu_item_sair));
+    }
+
+    void JanelaPrincipal::ao_clicar_menu_item_sair()
+    {
+        // fechar janela
+        this->close();
     }
 }
