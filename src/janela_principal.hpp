@@ -20,6 +20,7 @@
 
 #include <string>
 #include <gtkmm/builder.h>
+#include <gtkmm/headerbar.h>
 #include <gtkmm/menubar.h>
 #include <gtkmm/label.h>
 #include <gtkmm/box.h>
@@ -32,12 +33,16 @@ namespace nesbrasa::gui
     class JanelaPrincipal : public Gtk::Window
     {
     private:
+        static const guint ALTURA;
+        static const guint LARGURA;
         static const string RECURSO_CAMINHO;
 
-	    Gtk::Box   *raiz;
-	    Gtk::Label *label;
+        Gtk::Box *      raiz;
+        Gtk::Label*     label;
+        Gtk::HeaderBar* headerbar;
+        Gtk::MenuBar*   barra_menu;
         
-	    Glib::RefPtr<Gtk::Builder> builder;
+        Glib::RefPtr<Gtk::Builder> builder;
 
     public:
         JanelaPrincipal();

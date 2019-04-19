@@ -1,13 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.0 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkMenu" id="app_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="menu_item_sobre">
+        <property name="name">open_menu</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Show About Dialog</property>
+        <property name="label" translatable="yes">Sobre</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menu_item_sair">
+        <property name="name">open_menu</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Show About Dialog</property>
+        <property name="label" translatable="yes">Sair</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkHeaderBar" id="headerbar">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Nesbrasa</property>
+    <property name="show_close_button">True</property>
+    <child>
+      <object class="GtkButton" id="btn_abrir">
+        <property name="label" translatable="yes">Abrir</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+      </object>
+      <packing>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkMenuButton" id="btn_menu">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="relief">half</property>
+        <property name="draw_indicator">True</property>
+        <property name="popup">app_menu</property>
+        <property name="direction">none</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
   <object class="GtkBox" id="raiz">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
     <child>
-      <object class="GtkMenuBar">
+      <object class="GtkMenuBar" id="barra_menu">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
@@ -21,39 +84,12 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-new</property>
+                  <object class="GtkMenuItem" id="mi_abrir">
+                    <property name="name">open_menu</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-open</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-save</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-save-as</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
+                    <property name="tooltip_text" translatable="yes">Show About Dialog</property>
+                    <property name="label" translatable="yes">Abrir</property>
                   </object>
                 </child>
                 <child>
@@ -63,74 +99,16 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-quit</property>
+                  <object class="GtkMenuItem" id="mi_sair">
+                    <property name="name">open_menu</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
+                    <property name="tooltip_text" translatable="yes">Show About Dialog</property>
+                    <property name="label" translatable="yes">Sair</property>
                   </object>
                 </child>
               </object>
             </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkMenuItem">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">_Editar</property>
-            <property name="use_underline">True</property>
-            <child type="submenu">
-              <object class="GtkMenu">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-cut</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-copy</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-paste</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-delete</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkMenuItem">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">_Ver</property>
-            <property name="use_underline">True</property>
           </object>
         </child>
         <child>
@@ -144,12 +122,12 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkImageMenuItem">
-                    <property name="label">gtk-about</property>
+                  <object class="GtkMenuItem" id="mi_sobre">
+                    <property name="name">open_menu</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="use_underline">True</property>
-                    <property name="use_stock">True</property>
+                    <property name="tooltip_text" translatable="yes">Show About Dialog</property>
+                    <property name="label" translatable="yes">Sobre</property>
                   </object>
                 </child>
               </object>

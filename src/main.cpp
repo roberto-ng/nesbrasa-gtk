@@ -33,14 +33,11 @@ static const string APP_ID = "nesbrasa.nesbrasa.emu";
 static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
 {
     auto janela = app->get_active_window();
-
     if (janela == nullptr)
     {
         // criar janela
         janela = new JanelaPrincipal();
         janela->property_application() = app;
-        janela->property_default_width() = 600;
-        janela->property_default_height() = 300;
 
         app->add_window(*janela);
     }

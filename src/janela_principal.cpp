@@ -20,6 +20,8 @@
 
 namespace nesbrasa::gui
 {
+    const guint JanelaPrincipal::ALTURA = 600;
+    const guint JanelaPrincipal::LARGURA = 400;
     const string JanelaPrincipal::RECURSO_CAMINHO = "/nesbrasa/nesbrasa/emu/janela_principal.ui";
 
     JanelaPrincipal::JanelaPrincipal():
@@ -28,12 +30,27 @@ namespace nesbrasa::gui
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
         this->builder->get_widget("raiz", this->raiz);
         this->builder->get_widget("label", this->label);
+        this->builder->get_widget("headerbar", this->headerbar);
+        this->builder->get_widget("barra_menu", this->barra_menu);
 
         this->add(*this->raiz);
 
-        this->raiz->show();
+#if defined(_WIN32)
+        // usar barra de menu no Windows
+        this->barra_menu->show();
+#else
+        // usar headerbar no Gnu/Linux
+        this->set_titlebar(*this->headerbar);
+        this->barra_menu->hide();
+#endif
+
         this->label->show();
 
         this->set_title("Nesbrasa");
+
+        this->property_default_height() = LARGURA;
+        this->property_height_request() = LARGURA;
+        this->property_default_width() = ALTURA;
+        this->property_width_request() = ALTURA;
     }
 }
