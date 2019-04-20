@@ -58,7 +58,7 @@ static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
     janela->present();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     auto app = Gtk::Application::create(APP_ID, Gio::APPLICATION_FLAGS_NONE);
     app->signal_activate().connect(sigc::bind(&ao_ativar, app));

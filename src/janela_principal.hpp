@@ -40,8 +40,10 @@ namespace nesbrasa::gui
 
         Gtk::Box *      raiz;
         Gtk::Label*     label;
+        
         Gtk::HeaderBar* headerbar;
         Gtk::MenuBar*   barra_menu;
+
         Gtk::MenuItem*  menu_item_sair;
         Gtk::MenuItem*  barra_mi_sair;
         
@@ -50,8 +52,8 @@ namespace nesbrasa::gui
     public:
         JanelaPrincipal();
 
-        // sinais
-        
+        // sinais de eventos
+
         void ao_clicar_menu_item_sair();
     };
 }
