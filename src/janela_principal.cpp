@@ -118,8 +118,8 @@ namespace nesbrasa::gui
                         texto += arquivo.at(i); 
                     }
 
-                    Gtk::MessageDialog janela_erro(*this, texto);
-                    janela_erro.run();
+                    Gtk::MessageDialog janela_mensagem(*this, texto);
+                    janela_mensagem.run();
                     break;
                 }
 
