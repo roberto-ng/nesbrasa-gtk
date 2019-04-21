@@ -2,6 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "type": "shell",
+      "label": "nesbrasa-gtk",
+      "command": "${workspaceFolder}/_build/src/nesbrasa-gtk",
+      "isBackground": true,
+      "args": [],
+      "dependsOn": "ninja",
+    },
+    {
       "label": "meson",
       "type": "shell",
       "command": "/usr/bin/meson",
@@ -23,14 +31,6 @@
         "${workspaceFolder}/_build"
       ],
       "dependsOn": "meson",
-    },
-    {
-      "type": "shell",
-      "label": "nesbrasa-gtk",
-      "command": "${workspaceFolder}/_build/src/nesbrasa-gtk",
-      "isBackground": true,
-      "args": [],
-      "dependsOn": "ninja",
     },
   ],
 }

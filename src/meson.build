@@ -1,6 +1,7 @@
 nesbrasa_gtk_sources = [
+  'arquivo.cpp',
   'main.cpp',
-  'janela_principal.cpp',
+  'janela_principal.cpp'
 ]
 
 nesbrasa_gtk_deps = [

@@ -20,6 +20,7 @@
 
 #include <string>
 #include <gtkmm/builder.h>
+#include <gtkmm/button.h>
 #include <gtkmm/headerbar.h>
 #include <gtkmm/menubar.h>
 #include <gtkmm/menuitem.h>
@@ -37,23 +38,26 @@ namespace nesbrasa::gui
         static const guint ALTURA;
         static const guint LARGURA;
         static const string RECURSO_CAMINHO;
-
-        Gtk::Box *      raiz;
-        Gtk::Label*     label;
+        
+        Glib::RefPtr<Gtk::Builder> builder;
         
         Gtk::HeaderBar* headerbar;
         Gtk::MenuBar*   barra_menu;
 
-        Gtk::MenuItem*  menu_item_sair;
-        Gtk::MenuItem*  barra_mi_sair;
-        
-        Glib::RefPtr<Gtk::Builder> builder;
+        Gtk::Button* btn_abrir;
+        Gtk::Box *   raiz;
+        Gtk::Label*  label;
+
+        Gtk::MenuItem* menu_item_sair;
+        Gtk::MenuItem* barra_mi_sair;
+        Gtk::MenuItem* barra_mi_abrir;
 
     public:
         JanelaPrincipal();
 
         // sinais de eventos
 
-        void ao_clicar_menu_item_sair();
+        void ao_clicar_btn_abrir();
+        void ao_fechar_janela();
     };
 }

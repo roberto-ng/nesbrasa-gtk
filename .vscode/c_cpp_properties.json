@@ -27,6 +27,7 @@
                 "/usr/include/gdk-pixbuf-2.0",
                 "/usr/include/atk-1.0",
                 "/usr/include/gtkmm-3.0",
+                "/usr/include/gtkmm-3.0",
                 "/usr/include/gtkmm-3.0"
             ],
             "defines": [],
