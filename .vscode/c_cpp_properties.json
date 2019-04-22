@@ -28,7 +28,8 @@
                 "/usr/include/atk-1.0",
                 "/usr/include/gtkmm-3.0",
                 "/usr/include/gtkmm-3.0",
-                "/usr/include/gtkmm-3.0"
+                "/usr/include/gtkmm-3.0",
+                "/usr/local/include/nesbrasa"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

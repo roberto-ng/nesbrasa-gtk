@@ -14,8 +14,6 @@ finish-args:
 - "--talk-name=ca.desrt.dconf"
 - "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
 build-options:
-  cflags: "-O2 -g"
-  cxxflags: "-O2 -g"
   env:
     V: '1'
 cleanup:
@@ -90,7 +88,9 @@ modules:
 - name: nesbrasa-gtk
   builddir: true
   buildsystem: meson
+  build-options:
+    cxxflags: "-O2 -g -std=c++17 -DUSAR_EXPERIMENTAL=1"
   sources:
   - type: git
-    url: file:///home/roberto/Projetos/nesbrasa-gtk
+    url: https://gitlab.com/robertonazareth/nesbrasa-gtk
 
