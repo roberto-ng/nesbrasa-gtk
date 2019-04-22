@@ -6,6 +6,8 @@ project(
 	default_options : ['c_std=c11', 'cpp_std=c++17'],
 )
 
+nesbrasa_proj = subproject('nesbrasa')
+
 i18n = import('i18n')
 
 subdir('data')

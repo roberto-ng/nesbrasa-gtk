@@ -17,14 +17,12 @@
  */
 
 #include <iostream>
-#include <gtkmm/object.h>
-#include <gtkmm/main.h>
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/filechooser.h>
 #include <gtkmm.h>
 
 #include "janela_principal.hpp"
 #include "arquivo.hpp"
+
+using std::make_shared;
 
 namespace nesbrasa::gui
 {
@@ -35,6 +33,8 @@ namespace nesbrasa::gui
     JanelaPrincipal::JanelaPrincipal():
         Glib::ObjectBase("JanelaPrincipal")
     {
+        this->nes = make_shared<Nes>();
+
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
         this->builder->get_widget("raiz", this->raiz);
         this->builder->get_widget("label", this->label);
@@ -76,12 +76,8 @@ namespace nesbrasa::gui
 
     void JanelaPrincipal::ao_clicar_btn_abrir()
     {
-        GtkFileChooserNative* dialogo = gtk_file_chooser_native_new(
-                                            "Open File",
-                                            nullptr,
-                                            GTK_FILE_CHOOSER_ACTION_OPEN,
-                                            "_Open",
-                                            "_Cancel");
+        auto dialogo = gtk_file_chooser_native_new("Abrir arquivo", nullptr, 
+                            GTK_FILE_CHOOSER_ACTION_OPEN, "_Open","_Cancel");
 
 #if !defined(_WIN32)
         // Filtros de tipo de arquivo não funcionam com o escolhedor de arquivo
@@ -100,7 +96,8 @@ namespace nesbrasa::gui
         gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialogo), filtro_qualquer);
 #endif
 
-        try {
+        try 
+        {
             int resultado = gtk_native_dialog_run(GTK_NATIVE_DIALOG(dialogo));    
             switch (resultado)
             {
@@ -110,15 +107,10 @@ namespace nesbrasa::gui
                     string arquivo_nome(c_arquivo_nome);
                     g_free(c_arquivo_nome);
                     
-                    string texto = "Arquivo lido com sucesso! ";
                     auto arquivo = ler_arquivo(arquivo_nome);
-                    for (int i = 0; i < 3; i++)
-                    {
-                        std::cout << arquivo.at(i) << "\n";
-                        texto += arquivo.at(i); 
-                    }
+                    nes->carregar_rom(arquivo);
 
-                    Gtk::MessageDialog janela_mensagem(*this, texto);
+                    Gtk::MessageDialog janela_mensagem(*this, "ROM lida com sucesso!");
                     janela_mensagem.run();
                     break;
                 }
@@ -130,6 +122,11 @@ namespace nesbrasa::gui
                     throw -1;
                     break;
             }
+        }
+        catch (const string& err)
+        {
+            Gtk::MessageDialog janela_dialogo(*this, err);
+            janela_dialogo.run();
         }
         catch (...)
         {

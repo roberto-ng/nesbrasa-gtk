@@ -19,16 +19,14 @@
 #pragma once
 
 #include <string>
-#include <gtkmm/builder.h>
-#include <gtkmm/button.h>
-#include <gtkmm/headerbar.h>
-#include <gtkmm/menubar.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/label.h>
-#include <gtkmm/box.h>
-#include <gtkmm/window.h>
+#include <memory>
+#include <gtkmm.h>
+
+#include "nesbrasa.hpp"
 
 using std::string;
+using std::shared_ptr;
+using nesbrasa::nucleo::Nes;
 
 namespace nesbrasa::gui
 {
@@ -39,6 +37,8 @@ namespace nesbrasa::gui
         static const guint LARGURA;
         static const string RECURSO_CAMINHO;
         
+        shared_ptr<Nes> nes;
+
         Glib::RefPtr<Gtk::Builder> builder;
         
         Gtk::HeaderBar* headerbar;

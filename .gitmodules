@@ -1,0 +1,3 @@
+[submodule "subprojects/nesbrasa"]
+	path = subprojects/nesbrasa
+	url = git@gitlab.com:robertonazareth/nesbrasa
