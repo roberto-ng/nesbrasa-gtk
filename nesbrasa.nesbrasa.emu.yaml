@@ -1,7 +1,7 @@
 ---
 app-id: nesbrasa.nesbrasa.emu
 runtime: org.gnome.Platform
-runtime-version: '3.28'
+runtime-version: '3.32'
 sdk: org.gnome.Sdk
 command: nesbrasa-gtk
 finish-args:
@@ -48,8 +48,8 @@ modules:
   - "--disable-documentation"
   sources:
   - type: archive
-    url: http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.47/glibmm-2.47.92.tar.xz
-    sha256: 47cfcd960cbd78e1e960a04aa650227e7ce57874121f0f014140d3e40c928900
+    url: http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.60/glibmm-2.60.0.tar.xz
+    sha256: a3a1b1c9805479a16c0018acd84b3bfff23a122aee9e3c5013bb81231aeef2bc
 
 - name: cairomm
   config-opts:
@@ -64,16 +64,16 @@ modules:
   - "--disable-documentation"
   sources:
   - type: archive
-    url: http://ftp.gnome.org/pub/GNOME/sources/pangomm/2.38/pangomm-2.38.1.tar.xz
-    sha256: effb18505b36d81fc32989a39ead8b7858940d0533107336a30bc3eef096bc8b
+    url: http://ftp.gnome.org/pub/GNOME/sources/pangomm/2.40/pangomm-2.40.2.tar.xz
+    sha256: 0a97aa72513db9088ca3034af923484108746dba146e98ed76842cf858322d05
 
 - name: atkmm
   config-opts:
   - "--disable-documentation"
   sources:
   - type: archive
-    url: http://ftp.gnome.org/pub/GNOME/sources/atkmm/2.24/atkmm-2.24.2.tar.xz
-    sha256: ff95385759e2af23828d4056356f25376cfabc41e690ac1df055371537e458bd
+    url: http://ftp.gnome.org/pub/GNOME/sources/atkmm/2.24/atkmm-2.24.3.tar.xz
+    sha256: 9235b343cc0dceaef6c405e66ff69812447aa9fd9557068a2dfe4a62bf78e3a9
 
 - name: gtkmm
   config-opts:
@@ -82,14 +82,17 @@ modules:
     cxxflags: "-O2 -g -std=c++11"
   sources:
   - type: archive
-    url: http://ftp.gnome.org/pub/GNOME/sources/gtkmm/3.18/gtkmm-3.18.0.tar.xz
-    sha256: 829fa113daed74398c49c3f2b7672807f58ba85d0fa463f5bc726e1b0138b86b
+    url: http://ftp.gnome.org/pub/GNOME/sources/gtkmm/3.24/gtkmm-3.24.1.tar.xz
+    sha256: ddfe42ed2458a20a34de252854bcf4b52d3f0c671c045f56b42aa27c7542d2fd
 
 - name: nesbrasa-gtk
   builddir: true
   buildsystem: meson
   build-options:
-    cxxflags: "-O2 -g -std=c++17 -DUSAR_EXPERIMENTAL=1"
+    cxxflags: "-O2 -g -std=c++17"
+    env:
+      CC: 'clang'
+      CXX: 'clang++'
   sources:
   - type: git
     url: https://gitlab.com/robertonazareth/nesbrasa-gtk
