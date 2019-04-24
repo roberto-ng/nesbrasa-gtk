@@ -44,13 +44,13 @@ namespace nesbrasa::gui
         Gtk::HeaderBar* headerbar;
         Gtk::MenuBar*   barra_menu;
 
-        Gtk::Button* btn_abrir;
-        Gtk::Box *   raiz;
-        Gtk::Label*  label;
-
         Gtk::MenuItem* menu_item_sair;
         Gtk::MenuItem* barra_mi_sair;
         Gtk::MenuItem* barra_mi_abrir;
+        Gtk::Button*   btn_abrir;
+
+        Gtk::Box *        raiz;
+        Gtk::DrawingArea* quadro;
 
     public:
         JanelaPrincipal();
@@ -59,5 +59,6 @@ namespace nesbrasa::gui
 
         void ao_clicar_btn_abrir();
         void ao_fechar_janela();
+        bool ao_desenhar_quadro(const ::Cairo::RefPtr< ::Cairo::Context >& cr);
     };
 }

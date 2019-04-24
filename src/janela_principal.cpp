@@ -21,6 +21,7 @@
 
 #include "janela_principal.hpp"
 #include "arquivo.hpp"
+#include "sprites.hpp"
 
 using std::make_shared;
 
@@ -37,7 +38,7 @@ namespace nesbrasa::gui
 
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
         this->builder->get_widget("raiz", this->raiz);
-        this->builder->get_widget("label", this->label);
+        this->builder->get_widget("quadro", this->quadro);
         this->builder->get_widget("headerbar", this->headerbar);
         this->builder->get_widget("barra_menu", this->barra_menu);
         this->builder->get_widget("menu_item_sair", this->menu_item_sair);
@@ -56,7 +57,7 @@ namespace nesbrasa::gui
         this->barra_menu->hide();
 #endif
 
-        this->label->show();
+        this->quadro->show();
 
         this->set_title("Nesbrasa");
 
@@ -72,6 +73,8 @@ namespace nesbrasa::gui
 
         this->btn_abrir->signal_clicked().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
         this->barra_mi_abrir->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
+
+        this->quadro->signal_draw().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_desenhar_quadro));
     }
 
     void JanelaPrincipal::ao_clicar_btn_abrir()
@@ -141,5 +144,25 @@ namespace nesbrasa::gui
     {
         // fechar janela
         this->close();
+    }
+
+    // Sinal ativado quando é necessário redesenhar o quadro.
+    // Desenha uma textura na tela
+    bool JanelaPrincipal::ao_desenhar_quadro(const ::Cairo::RefPtr< ::Cairo::Context >& cr)
+    {
+        const guint largura = this->quadro->get_allocation().get_width();
+        const guint altura = this->quadro->get_allocation().get_height();
+
+        auto textura = criar_textura_sprites(*this->nes);
+
+        auto pixbuf = Gdk::Pixbuf::create_from_data(textura.data(), Gdk::COLORSPACE_RGB, false, 8, 4, 4, 3*4);
+        auto pixbuf_escalado = pixbuf->scale_simple(largura, altura, Gdk::InterpType::INTERP_NEAREST);
+        
+        Gdk::Cairo::set_source_pixbuf(cr, pixbuf_escalado, 0, 0);
+        cr->rectangle(0, 0, largura, altura);
+        cr->fill();
+
+        // retornar true para parar de desenhar
+        return true;
     }
 }

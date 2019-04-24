@@ -1,7 +1,8 @@
 nesbrasa_gtk_sources = [
   'arquivo.cpp',
   'main.cpp',
-  'janela_principal.cpp'
+  'janela_principal.cpp',
+  'sprites.cpp',
 ]
 
 nesbrasa_gtk_deps = [
