@@ -59,6 +59,6 @@ namespace nesbrasa::gui
 
         void ao_clicar_btn_abrir();
         void ao_fechar_janela();
-        bool ao_desenhar_quadro(const ::Cairo::RefPtr< ::Cairo::Context >& cr);
+        bool ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr);
     };
 }

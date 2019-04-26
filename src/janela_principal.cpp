@@ -112,9 +112,6 @@ namespace nesbrasa::gui
                     
                     auto arquivo = ler_arquivo(arquivo_nome);
                     nes->carregar_rom(arquivo);
-
-                    Gtk::MessageDialog janela_mensagem(*this, "ROM lida com sucesso!");
-                    janela_mensagem.run();
                     break;
                 }
 
@@ -138,6 +135,9 @@ namespace nesbrasa::gui
         }
 
         g_object_unref(dialogo);
+
+        // re-renderizar quadro
+        this->quadro->queue_draw();
     }
 
     void JanelaPrincipal::ao_fechar_janela()
@@ -146,23 +146,37 @@ namespace nesbrasa::gui
         this->close();
     }
 
-    // Sinal ativado quando é necessário redesenhar o quadro.
-    // Desenha uma textura na tela
-    bool JanelaPrincipal::ao_desenhar_quadro(const ::Cairo::RefPtr< ::Cairo::Context >& cr)
+    // Sinal ativado quando é necessário renderizar o quadro.
+    // Renderiza uma textura na tela
+    bool JanelaPrincipal::ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr)
     {
         const guint largura = this->quadro->get_allocation().get_width();
         const guint altura = this->quadro->get_allocation().get_height();
 
+        if (!this->nes->cartucho.possui_rom_carregada())
+        {
+            // deixar o quadro completamente preto
+            cr->set_source_rgb(0, 0, 0);
+            cr->rectangle(0, 0, largura, altura);
+            cr->fill();
+
+            return true;
+        }
+
+        // carrega a textura
         auto textura = criar_textura_sprites(*this->nes);
 
-        auto pixbuf = Gdk::Pixbuf::create_from_data(textura.data(), Gdk::COLORSPACE_RGB, false, 8, 4, 4, 3*4);
+        // transforma a textura em um pixbuf para que ela possa ser entendida pelo GTK
+        auto pixbuf = Gdk::Pixbuf::create_from_data(textura.data(), Gdk::COLORSPACE_RGB, false, 8, 8, 8, 3*8);
+        // aumenta o tamanho do pixbuf para ele preencher o quadro 
         auto pixbuf_escalado = pixbuf->scale_simple(largura, altura, Gdk::InterpType::INTERP_NEAREST);
-        
+
+        // renderizar o pixbuf
         Gdk::Cairo::set_source_pixbuf(cr, pixbuf_escalado, 0, 0);
         cr->rectangle(0, 0, largura, altura);
         cr->fill();
 
-        // retornar true para parar de desenhar
+        // retornar true para parar de re-renderizar
         return true;
     }
 }
