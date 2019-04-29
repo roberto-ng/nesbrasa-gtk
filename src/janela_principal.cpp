@@ -166,9 +166,10 @@ namespace nesbrasa::gui
         auto texturas = criar_textura_sprites(*this->nes);
         auto display = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, largura, altura);
         // preenche o display com um fundo branco
-        display->fill(0xFFFFFFFF);
+        display->fill(0x00000000);
 
         int y = 0;
+        int borda = 2;
         for (guint i = 0; i < texturas.size(); i++)
         {
             auto& textura = texturas.at(i);
@@ -180,10 +181,10 @@ namespace nesbrasa::gui
             auto pixbuf_escalado = pixbuf->scale_simple(pixbuf->get_width()*7, pixbuf->get_height()*7, 
                                         Gdk::InterpType::INTERP_NEAREST);
 
-            int x = (((i+1)%0x20)-1) * pixbuf_escalado->get_width();
+            int x = (((i+1)%0x20)-1) * (pixbuf_escalado->get_width() + borda);
             if (i > 0 && ((i+1)%0x20) == 0)
             {
-                y += pixbuf_escalado->get_height();
+                y += pixbuf_escalado->get_height() + borda;
             }
 
             pixbuf_escalado->copy_area(0, 0, 
