@@ -163,19 +163,39 @@ namespace nesbrasa::gui
             return true;
         }
 
-        // carrega a textura
-        auto textura = criar_textura_sprites(*this->nes);
+        auto texturas = criar_textura_sprites(*this->nes);
+        auto display = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, largura, altura);
+        // preenche o display com um fundo branco
+        display->fill(0xFFFFFFFF);
 
-        // transforma a textura em um pixbuf para que ela possa ser entendida pelo GTK
-        auto pixbuf = Gdk::Pixbuf::create_from_data(textura.data(), Gdk::COLORSPACE_RGB, false, 8, 8, 8, 3*8);
-        // aumenta o tamanho do pixbuf para ele preencher o quadro 
-        auto pixbuf_escalado = pixbuf->scale_simple(largura, altura, Gdk::InterpType::INTERP_NEAREST);
+        int y = 0;
+        for (guint i = 0; i < texturas.size(); i++)
+        {
+            auto& textura = texturas.at(i);
+            // transforma a textura em um pixbuf para que ela possa ser entendida pelo GTK
+            auto pixbuf = Gdk::Pixbuf::create_from_data(textura.data(), Gdk::COLORSPACE_RGB, 
+                            false, 8, 8, 8, 3*8);
 
-        // renderizar o pixbuf
-        Gdk::Cairo::set_source_pixbuf(cr, pixbuf_escalado, 0, 0);
-        cr->rectangle(0, 0, largura, altura);
+            // aumenta o tamanho do pixbuf para ele preencher o quadro 
+            auto pixbuf_escalado = pixbuf->scale_simple(pixbuf->get_width()*7, pixbuf->get_height()*7, 
+                                        Gdk::InterpType::INTERP_NEAREST);
+
+            int x = (((i+1)%0x20)-1) * pixbuf_escalado->get_width();
+            if (i > 0 && ((i+1)%0x20) == 0)
+            {
+                y += pixbuf_escalado->get_height();
+            }
+
+            pixbuf_escalado->copy_area(0, 0, 
+                                pixbuf_escalado->get_width(), 
+                                pixbuf_escalado->get_height(), 
+                                display, x, y);
+        }
+
+        Gdk::Cairo::set_source_pixbuf(cr, display, 0, 0);
+        cr->rectangle(0, 0, display->get_width(), display->get_height());
         cr->fill();
-
+        
         // retornar true para parar de re-renderizar
         return true;
     }

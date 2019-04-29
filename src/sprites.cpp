@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "sprites.hpp"
 #include "util.hpp"
 
@@ -7,46 +5,19 @@ using nesbrasa::nucleo::buscar_bit;
 
 namespace nesbrasa::gui
 {
-    vector<guint8> criar_textura_sprites(const Nes& nes)
+    vector< vector<guint8> > criar_textura_sprites(Nes& nes)
     {
-        auto sprite = ler_sprite(nes, 0x03);
+        int sprites_qtd = (nes.cartucho.get_chr_quantidade()*0x2000) / 16;
+        //sprites_qtd = 4;
 
-        vector<guint8> textura;
-        for (auto valor : sprite)
+        vector< vector<guint8> > sprites;
+        for (int i = 0; i < sprites_qtd; i++)
         {
-            switch (valor)
-            {
-                case 0:
-                    textura.push_back(255);
-                    textura.push_back(255);
-                    textura.push_back(255);
-                    break;
-                
-                case 1:
-                    textura.push_back(14);
-                    textura.push_back(14);
-                    textura.push_back(14);
-                    break;
-
-                case 2:
-                    textura.push_back(84);
-                    textura.push_back(84);
-                    textura.push_back(84);
-                    break;
-
-                case 3:
-                    textura.push_back(0);
-                    textura.push_back(0);
-                    textura.push_back(0);
-                    break;
-                
-                default:
-                    throw string("Erro: Cor inválida");
-                    break;
-            }
+            auto sprite = ler_sprite(nes, i);
+            sprites.push_back(sprite);
         }
 
-        return textura;
+        return sprites;
     }
 
     vector<guint8> ler_sprite(const Nes& nes, guint pos)
@@ -65,7 +36,36 @@ namespace nesbrasa::gui
                 guint8 bit2 = buscar_bit(byte2, j);
                 guint8 valor = bit1 + bit2 + ((bit2 > 0)? 1 : 0);
 
-                sprite.push_back(valor);
+                switch (valor)
+                {
+                    case 0:
+                        sprite.push_back(0xFF);
+                        sprite.push_back(0xFF);
+                        sprite.push_back(0xFF);
+                        break;
+                    
+                    case 1:
+                        sprite.push_back(0xBC);
+                        sprite.push_back(0xBC);
+                        sprite.push_back(0xBC);
+                        break;
+
+                    case 2:
+                        sprite.push_back(0x7C);
+                        sprite.push_back(0x7C);
+                        sprite.push_back(0x7C);
+                        break;
+
+                    case 3:
+                        sprite.push_back(0x00);
+                        sprite.push_back(0x00);
+                        sprite.push_back(0x00);
+                        break;
+                    
+                    default:
+                        throw string("Erro: Cor inválida");
+                        break;
+                }
             }
         }
 

@@ -10,7 +10,7 @@ using nesbrasa::nucleo::Nes;
 
 namespace nesbrasa::gui
 {
-    vector<guint8> criar_textura_sprites(const Nes& nes);
+    vector< vector<guint8> > criar_textura_sprites(Nes& nes);
 
     vector<guint8> ler_sprite(const Nes& nes, guint pos);
 }
