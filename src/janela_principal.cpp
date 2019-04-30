@@ -168,16 +168,11 @@ namespace nesbrasa::gui
             return true;
         }
 
-        // deixar o quadro completamente preto
-        cr->set_source_rgb(0, 0, 0);
-        cr->rectangle(0, 0, largura, altura);
-        cr->fill();
-
         auto texturas = criar_textura_sprites(*this->nes);
 
         int borda = 2;
-        int display_largura = 0x20*8*5 + 0x20*borda;
-        int display_altura = (texturas.size()/0x20)*8*5 + 0x20*borda;
+        int display_largura = 0x1F*8*5 + 0x1F*borda;
+        int display_altura = (texturas.size()/0x1F)*8*5 + (texturas.size()/0x1F)*borda;
         auto display = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, display_largura, display_altura);
         // preenche o display com um fundo branco
         display->fill(0x00000000);
