@@ -24,9 +24,13 @@
 #include "sprites.hpp"
 
 using std::make_shared;
+using std::runtime_error;
+using std::exception;
 
 namespace nesbrasa::gui
 {
+    using namespace std::string_literals;
+
     const guint JanelaPrincipal::ALTURA = 600;
     const guint JanelaPrincipal::LARGURA = 400;
     const string JanelaPrincipal::RECURSO_CAMINHO = "/nesbrasa/nesbrasa/emu/janela_principal.ui";
@@ -119,18 +123,18 @@ namespace nesbrasa::gui
                     break;
 
                 default:
-                    throw -1;
+                    throw runtime_error("Erro ao abrir arquivo, resultado inválido"s);
                     break;
             }
         }
-        catch (const string& err)
+        catch (const exception& e)
         {
-            Gtk::MessageDialog janela_dialogo(*this, err);
+            Gtk::MessageDialog janela_dialogo(*this, e.what(), Gtk::MessageType::MESSAGE_ERROR);
             janela_dialogo.run();
         }
         catch (...)
         {
-            Gtk::MessageDialog janela_dialogo(*this, "Erro ao abrir arquivo");
+            Gtk::MessageDialog janela_dialogo(*this, "Erro ao abrir arquivo", Gtk::MessageType::MESSAGE_ERROR);
             janela_dialogo.run();
         }
 

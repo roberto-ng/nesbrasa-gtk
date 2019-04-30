@@ -49,7 +49,7 @@ namespace nesbrasa::gui
         Gtk::MenuItem* barra_mi_abrir;
         Gtk::Button*   btn_abrir;
 
-        Gtk::Box *        raiz;
+        Gtk::Box*         raiz;
         Gtk::DrawingArea* quadro;
 
     public:
