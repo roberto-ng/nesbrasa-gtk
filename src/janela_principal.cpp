@@ -160,10 +160,9 @@ namespace nesbrasa::gui
 
         if (!this->nes->cartucho.possui_rom_carregada())
         {
-            // deixar o quadro completamente preto
-            cr->set_source_rgb(0, 0, 0);
-            cr->rectangle(0, 0, largura, altura);
-            cr->fill();
+            // deixar o quadro em branco
+            auto estilo = this->quadro->get_style_context();
+            estilo->render_background(cr, 0, 0, largura, altura);
 
             return true;
         }
