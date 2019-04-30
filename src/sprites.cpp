@@ -1,6 +1,9 @@
+#include <stdexcept>
+
 #include "sprites.hpp"
 #include "util.hpp"
 
+using std::runtime_error;
 using nesbrasa::nucleo::buscar_bit;
 
 namespace nesbrasa::gui
@@ -63,7 +66,7 @@ namespace nesbrasa::gui
                         break;
                     
                     default:
-                        throw string("Erro: Cor inválida");
+                        throw runtime_error("Erro: Cor inválida");
                         break;
                 }
             }
