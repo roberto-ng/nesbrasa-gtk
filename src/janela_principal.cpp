@@ -43,6 +43,7 @@ namespace nesbrasa::gui
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
         this->builder->get_widget("raiz", this->raiz);
         this->builder->get_widget("quadro", this->quadro);
+        this->builder->get_widget("scroll", this->scroll);
         this->builder->get_widget("headerbar", this->headerbar);
         this->builder->get_widget("barra_menu", this->barra_menu);
         this->builder->get_widget("menu_item_sair", this->menu_item_sair);
@@ -56,12 +57,12 @@ namespace nesbrasa::gui
         // usar barra de menu no Windows
         this->barra_menu->show();
 #else
-        // usar headerbar no Gnu/Linux
+        // usar headerbar 
         this->set_titlebar(*this->headerbar);
         this->barra_menu->hide();
 #endif
 
-        this->quadro->show();
+        this->scroll->show_all_children();
 
         this->set_title("Nesbrasa");
 
@@ -154,8 +155,8 @@ namespace nesbrasa::gui
     // Renderiza uma textura na tela
     bool JanelaPrincipal::ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr)
     {
-        const guint largura = this->quadro->get_allocation().get_width();
-        const guint altura = this->quadro->get_allocation().get_height();
+        const int largura = this->quadro->get_allocation().get_width();
+        const int altura = this->quadro->get_allocation().get_height();
 
         if (!this->nes->cartucho.possui_rom_carregada())
         {
@@ -167,13 +168,21 @@ namespace nesbrasa::gui
             return true;
         }
 
+        // deixar o quadro completamente preto
+        cr->set_source_rgb(0, 0, 0);
+        cr->rectangle(0, 0, largura, altura);
+        cr->fill();
+
         auto texturas = criar_textura_sprites(*this->nes);
-        auto display = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, largura, altura);
+
+        int borda = 2;
+        int display_largura = 0x20*8*5 + 0x20*borda;
+        int display_altura = (texturas.size()/0x20)*8*5 + 0x20*borda;
+        auto display = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, display_largura, display_altura);
         // preenche o display com um fundo branco
         display->fill(0x00000000);
 
         int y = 0;
-        int borda = 2;
         for (guint i = 0; i < texturas.size(); i++)
         {
             auto& textura = texturas.at(i);
@@ -182,7 +191,7 @@ namespace nesbrasa::gui
                             false, 8, 8, 8, 3*8);
 
             // aumenta o tamanho do pixbuf para ele preencher o quadro 
-            auto pixbuf_escalado = pixbuf->scale_simple(pixbuf->get_width()*7, pixbuf->get_height()*7, 
+            auto pixbuf_escalado = pixbuf->scale_simple(pixbuf->get_width()*5, pixbuf->get_height()*5, 
                                         Gdk::InterpType::INTERP_NEAREST);
 
             int x = (((i+1)%0x20)-1) * (pixbuf_escalado->get_width() + borda);
@@ -190,16 +199,24 @@ namespace nesbrasa::gui
             {
                 y += pixbuf_escalado->get_height() + borda;
             }
-
-            pixbuf_escalado->copy_area(0, 0, 
-                                pixbuf_escalado->get_width(), 
-                                pixbuf_escalado->get_height(), 
-                                display, x, y);
+            
+            if ((x >= 0 && y >= 0) &&
+                (x + pixbuf_escalado->get_width())  < display->get_width() && 
+                (y + pixbuf_escalado->get_height()) < display->get_height())
+            {
+                pixbuf_escalado->copy_area(0, 0, 
+                                    pixbuf_escalado->get_width(), 
+                                    pixbuf_escalado->get_height(), 
+                                    display, x, y);
+            }
         }
 
         Gdk::Cairo::set_source_pixbuf(cr, display, 0, 0);
         cr->rectangle(0, 0, display->get_width(), display->get_height());
         cr->fill();
+
+        // faz a barra de scroll obedecer o tamanho do quadro
+        this->quadro->set_size_request(display->get_width(), display->get_height());
         
         // retornar true para parar de re-renderizar
         return true;
