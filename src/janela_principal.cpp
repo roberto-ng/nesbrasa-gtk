@@ -23,12 +23,11 @@
 #include "arquivo.hpp"
 #include "sprites.hpp"
 
-using std::make_shared;
-using std::runtime_error;
-using std::exception;
-
 namespace nesbrasa::gui
 {
+    using std::make_shared;
+    using std::runtime_error;
+    using std::exception;
     using namespace std::string_literals;
 
     const guint JanelaPrincipal::ALTURA = 600;
@@ -158,7 +157,7 @@ namespace nesbrasa::gui
         const int largura = this->quadro->get_allocation().get_width();
         const int altura = this->quadro->get_allocation().get_height();
 
-        if (!this->nes->cartucho.possui_rom_carregada())
+        if (!this->nes->programa_carregado)
         {
             // deixar o quadro em branco
             auto estilo = this->quadro->get_style_context();

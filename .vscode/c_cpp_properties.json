@@ -29,7 +29,9 @@
                 "/usr/include/gtkmm-3.0",
                 "/usr/include/gtkmm-3.0",
                 "/usr/include/gtkmm-3.0",
-                "/usr/local/include/nesbrasa"
+                "/usr/local/include/nesbrasa",
+                "/usr/include/gtkmm-3.0",
+                "/usr/include/gtkmm-3.0"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

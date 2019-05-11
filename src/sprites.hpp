@@ -4,13 +4,15 @@
 #include <gtkmm.h>
 
 #include "nesbrasa.hpp"
-
-using std::vector;
-using nesbrasa::nucleo::Nes;
+#include "tipos_numeros.hpp"
 
 namespace nesbrasa::gui
 {
-    vector< vector<guint8> > criar_textura_sprites(Nes& nes);
+    using std::vector;
+    using nesbrasa::nucleo::Nes;
+    using namespace nesbrasa::tipos;
 
-    vector<guint8> ler_sprite(const Nes& nes, guint pos);
+    vector< vector<byte> > criar_textura_sprites(const Nes& nes);
+
+    vector<byte> ler_sprite(const Nes& nes, guint pos);
 }

@@ -4,11 +4,14 @@
 #include <string>
 #include <fstream>
 
-using std::vector;
-using std::string;
-using std::ifstream;
+#include "tipos_numeros.hpp"
 
 namespace nesbrasa::gui
 {
-    vector<uint8_t> ler_arquivo(string caminho);
+    using std::vector;
+    using std::string;
+    using std::ifstream;
+    using namespace nesbrasa::tipos;
+
+    vector<byte> ler_arquivo(string caminho);
 }

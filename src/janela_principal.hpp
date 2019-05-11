@@ -24,12 +24,12 @@
 
 #include "nesbrasa.hpp"
 
-using std::string;
-using std::shared_ptr;
-using nesbrasa::nucleo::Nes;
-
 namespace nesbrasa::gui
 {
+    using std::string;
+    using std::shared_ptr;
+    using nesbrasa::nucleo::Nes;
+
     class JanelaPrincipal : public Gtk::Window
     {
     private:

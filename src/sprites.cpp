@@ -1,19 +1,22 @@
 #include <stdexcept>
+#include <iostream>
 
 #include "sprites.hpp"
 #include "util.hpp"
 
-using std::runtime_error;
-using nesbrasa::nucleo::buscar_bit;
-
 namespace nesbrasa::gui
 {
-    vector< vector<guint8> > criar_textura_sprites(Nes& nes)
-    {
-        int sprites_qtd = (nes.cartucho.get_chr_quantidade()*0x2000) / 16;
-        //sprites_qtd = 4;
+    using std::runtime_error;
+    using nesbrasa::nucleo::buscar_bit;
 
-        vector< vector<guint8> > sprites;
+    vector< vector<byte> > criar_textura_sprites(const Nes& nes)
+    {
+        const int chr_quantidade = nes.cartucho->get_chr_bancos_quantidade();
+        const int chr_bancos_tam = nes.cartucho->CHR_BANCOS_TAMANHO;
+
+        const int sprites_qtd = (chr_quantidade*chr_bancos_tam) / 16;
+
+        vector< vector<byte> > sprites;
         for (int i = 0; i < sprites_qtd; i++)
         {
             auto sprite = ler_sprite(nes, i);
@@ -23,21 +26,19 @@ namespace nesbrasa::gui
         return sprites;
     }
 
-    vector<guint8> ler_sprite(const Nes& nes, guint pos)
-    {
-        auto& chr_rom = nes.cartucho.chr;
-        
-        vector<guint8> sprite;
+    vector<byte> ler_sprite(const Nes& nes, uint pos)
+    {        
+        vector<byte> sprite;
         for (int i = 0; i < 8; i++)
         {
-            guint8 byte1 = chr_rom.at((pos*16) + i);
-            guint8 byte2 = chr_rom.at((pos*16) + i+8);
+            byte byte1 = nes.cartucho->ler((pos*16) + i);
+            byte byte2 = nes.cartucho->ler((pos*16) + i+8);
 
             for (int j = 7; j >= 0; j--)
             {
-                guint8 bit1 = buscar_bit(byte1, j);
-                guint8 bit2 = buscar_bit(byte2, j);
-                guint8 valor = bit1 + bit2 + ((bit2 > 0)? 1 : 0);
+                byte bit1 = buscar_bit(byte1, j);
+                byte bit2 = buscar_bit(byte2, j);
+                byte valor = bit1 + bit2 + ((bit2 > 0)? 1 : 0);
 
                 switch (valor)
                 {
