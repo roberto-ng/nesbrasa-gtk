@@ -212,9 +212,14 @@ namespace nesbrasa::gui
         const int nes_tela_altura = 240;
         const int nes_pixels_qtd = nes_tela_largura * nes_tela_altura;
 
-        auto textura = this->nes->ppu.get_textura();
+        //auto textura = this->nes->ppu.get_textura();
         auto pixels = this->pixbuf->get_pixels();
+        auto textura = this->nes->ppu.gerar_textura_rgb();
+        for (int i = 0; i < textura.size(); i++) {
+            pixels[i] = textura.at(i);
+        }
 
+        /*
         for (int y = 0; y < nes_tela_altura; y++) 
         {
             for (int x = 0; x < nes_tela_largura; x++) 
@@ -229,6 +234,7 @@ namespace nesbrasa::gui
                 pixels[ptr+2] = cor_rgb.at(2);
             }
 	    }
+        */
 
         //const int largura = this->quadro->get_allocation().get_width();
         //const int altura = this->quadro->get_allocation().get_height();
