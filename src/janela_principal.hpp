@@ -69,5 +69,7 @@ namespace nesbrasa::gui
         void ao_fechar_janela();
         bool ao_atualizar(const Glib::RefPtr<Gdk::FrameClock>& frame_clock);
         bool ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr);
+        bool ao_pressionar_tecla(GdkEventKey* evento);
+        bool ao_soltar_tecla(GdkEventKey* evento);
     };
 }

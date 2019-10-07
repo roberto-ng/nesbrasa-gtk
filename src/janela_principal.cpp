@@ -30,6 +30,7 @@ namespace nesbrasa::gui
     using std::make_unique;
     using std::runtime_error;
     using std::exception;
+    using nucleo::BotaoTipos;
     using namespace std::string_literals;
 
     const guint JanelaPrincipal::ALTURA = 600;
@@ -87,6 +88,9 @@ namespace nesbrasa::gui
 
         this->quadro->signal_draw().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_desenhar_quadro));
         this->quadro->add_tick_callback(sigc::mem_fun(*this, &JanelaPrincipal::ao_atualizar));
+
+        this->signal_key_press_event().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_pressionar_tecla), false);
+        this->signal_key_release_event().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_soltar_tecla), false);
     }
 
     void JanelaPrincipal::ao_clicar_btn_abrir()
@@ -158,19 +162,21 @@ namespace nesbrasa::gui
         this->close();
     }
 
+    // Função chamada uma vez a cada frame do monitor
     bool JanelaPrincipal::ao_atualizar(const Glib::RefPtr<Gdk::FrameClock>& frame_clock)
     {
-        const int nes_tela_largura = 256;
-        const int nes_tela_altura = 240;
-        const int nes_pixels_qtd = nes_tela_largura * nes_tela_altura;
-        double tempo = static_cast<double>(frame_clock->get_frame_time()) / 1000000.0;
+        //double tempo = static_cast<double>(frame_clock->get_frame_time()) / 1000000.0;
 
         if (!this->nes->is_programa_carregado)
         {
-            this->ultimo_tempo = tempo;
+            //this->ultimo_tempo = tempo;
             return G_SOURCE_CONTINUE;
         }
+
+        // dar foco ao quadro
+        this->quadro->grab_focus();
         
+        /*
         if (!this->ultimo_tempo.has_value())
         {
             this->ultimo_tempo = frame_clock->get_frame_time();
@@ -182,19 +188,14 @@ namespace nesbrasa::gui
 
         if (delta > 1.0)
             delta = 0.0;
+        */
 
-        //this->nes->avancar_por(delta);
-        int ciclos = (341 * 262 / 3) | 0;
+        int ciclos = 35464; 
         for (int i = 0; i < ciclos; i++)
         {
             this->nes->avancar();
         }
 
-        /*
-        this->pixbuf = Gdk::Pixbuf::create_from_data(this->textura.data(), Gdk::COLORSPACE_RGB, 
-                                                     false, 8, nes_tela_largura, nes_tela_altura, 
-                                                     nes_tela_largura*3);
-        */
         this->quadro->queue_draw();
         return G_SOURCE_CONTINUE;
     }
@@ -208,99 +209,147 @@ namespace nesbrasa::gui
             return false;
         }
 
-        const int nes_tela_largura = 256;
-        const int nes_tela_altura = 240;
-        const int nes_pixels_qtd = nes_tela_largura * nes_tela_altura;
+        const double nes_tela_largura = 256;
+        const double nes_tela_altura = 240;
 
-        //auto textura = this->nes->ppu.get_textura();
         auto pixels = this->pixbuf->get_pixels();
-        auto textura = this->nes->ppu.gerar_textura_rgb();
+        auto textura = this->nes->ppu.get_textura();
         for (int i = 0; i < textura.size(); i++) {
-            pixels[i] = textura.at(i);
+            uint32 valor = textura.at(i);
+            pixels[i*3 + 0] = (valor & 0xFF0000) >> 4*4;
+            pixels[i*3 + 1] = (valor & 0x00FF00) >> 4*2;
+            pixels[i*3 + 2] = (valor & 0x0000FF);
         }
 
-        /*
-        for (int y = 0; y < nes_tela_altura; y++) 
+        const double largura = this->quadro->get_allocation().get_width();
+        const double altura = this->quadro->get_allocation().get_height();
+
+        double escala = 0;
+        double largura_escalada = 0;
+        double altura_escalada = 0;
+        double pos_x = 0;
+        double pos_y = 0;
+
+        if (altura > largura)
         {
-            for (int x = 0; x < nes_tela_largura; x++) 
-            {
-                uint ptr = y * nes_tela_largura + x;
-                byte valor = textura.at(ptr);
-                auto cor_rgb = nucleo::cores::buscar_cor_rgb(valor);
+            // se a altura for maior que a largura 
+            escala = largura/nes_tela_largura;
+            largura_escalada = largura;
+            altura_escalada = nes_tela_altura*escala;
+            
+            // centralizar verticalmente
+            pos_y = (altura - altura_escalada) / 2.0;
+        }
+        else
+        {
+            // se a largura for maior ou igual que a altura
+            escala = altura/nes_tela_altura;
+            largura_escalada = nes_tela_largura*escala;
+            altura_escalada = altura;
+            
+            // centralizar horizontalmente
+            pos_x = (largura - largura_escalada) / 2.0;
+        }
 
-                ptr *= 3;
-                pixels[ptr] = cor_rgb.at(0);
-                pixels[ptr+1] = cor_rgb.at(1);
-                pixels[ptr+2] = cor_rgb.at(2);
-            }
-	    }
-        */
 
-        //const int largura = this->quadro->get_allocation().get_width();
-        //const int altura = this->quadro->get_allocation().get_height();
-        Gdk::Cairo::set_source_pixbuf(cr, this->pixbuf, 0, 0);
-        cr->rectangle(0, 0, this->pixbuf->get_width(), this->pixbuf->get_height());
+        auto pixbuf_escalado = pixbuf->scale_simple(
+            largura_escalada, 
+            altura_escalada, 
+            Gdk::InterpType::INTERP_NEAREST
+        );
+
+        // renderizar fundo
+        auto estilo = this->quadro->get_style_context();
+        estilo->render_background(cr, 0, 0, largura, altura);
+
+        // renderizar o buffer da tela
+        Gdk::Cairo::set_source_pixbuf(cr, pixbuf_escalado, pos_x, pos_y);
+        cr->rectangle(pos_x, pos_y, pixbuf_escalado->get_width(), pixbuf_escalado->get_height());
         cr->fill();
         return false;
+    }
 
-        /*
-
-        if (!this->nes->programa_carregado)
+    bool JanelaPrincipal::ao_pressionar_tecla(GdkEventKey* evento)
+    {
+        switch (evento->keyval)
         {
-            // deixar o quadro em branco
-            auto estilo = this->quadro->get_style_context();
-            estilo->render_background(cr, 0, 0, largura, altura);
+            case GDK_KEY_z:
+                this->nes->controle_1.set_botao(BotaoTipos::A, true);
+                break;
 
-            return true;
-        }
+            case GDK_KEY_x:
+                this->nes->controle_1.set_botao(BotaoTipos::B, true);
+                break;
 
-        auto texturas = criar_textura_sprites(*this->nes);
+            case GDK_KEY_s:
+                this->nes->controle_1.set_botao(BotaoTipos::SELECT, true);
+                break;
 
-        int borda = 2;
-        int display_largura = 0x1F*8*5 + 0x1F*borda;
-        int display_altura = (texturas.size()/0x1F)*8*5 + (texturas.size()/0x1F)*borda;
-        auto display = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, display_largura, display_altura);
-        // preenche o display com um fundo branco
-        display->fill(0x00000000);
+            case GDK_KEY_a:
+                this->nes->controle_1.set_botao(BotaoTipos::START, true);
+                break;
 
-        int y = 0;
-        for (guint i = 0; i < texturas.size(); i++)
-        {
-            auto& textura = texturas.at(i);
-            // transforma a textura em um pixbuf para que ela possa ser entendida pelo GTK
-            auto pixbuf = Gdk::Pixbuf::create_from_data(textura.data(), Gdk::COLORSPACE_RGB, 
-                            false, 8, 8, 8, 3*8);
-
-            // aumenta o tamanho do pixbuf para ele preencher o quadro 
-            auto pixbuf_escalado = pixbuf->scale_simple(pixbuf->get_width()*5, pixbuf->get_height()*5, 
-                                        Gdk::InterpType::INTERP_NEAREST);
-
-            int x = (((i+1)%0x20)-1) * (pixbuf_escalado->get_width() + borda);
-            if (i > 0 && ((i+1)%0x20) == 0)
-            {
-                y += pixbuf_escalado->get_height() + borda;
-            }
+            case GDK_KEY_Up:
+                this->nes->controle_1.set_botao(BotaoTipos::CIMA, true);
+                break;
             
-            if ((x >= 0 && y >= 0) &&
-                (x + pixbuf_escalado->get_width())  < display->get_width() && 
-                (y + pixbuf_escalado->get_height()) < display->get_height())
-            {
-                pixbuf_escalado->copy_area(0, 0, 
-                                    pixbuf_escalado->get_width(), 
-                                    pixbuf_escalado->get_height(), 
-                                    display, x, y);
-            }
+            case GDK_KEY_Down:
+                this->nes->controle_1.set_botao(BotaoTipos::BAIXO, true);
+                break;
+            
+            case GDK_KEY_Left:
+                this->nes->controle_1.set_botao(BotaoTipos::ESQUERDA, true);
+                break;
+
+            case GDK_KEY_Right:
+                this->nes->controle_1.set_botao(BotaoTipos::DIREITA, true);
+                break;
+            
+            default: break;
         }
 
-        Gdk::Cairo::set_source_pixbuf(cr, display, 0, 0);
-        cr->rectangle(0, 0, display->get_width(), display->get_height());
-        cr->fill();
+        return false;
+    }
 
-        // faz a barra de scroll obedecer o tamanho do quadro
-        this->quadro->set_size_request(display->get_width(), display->get_height());
-        
-        // retornar true para parar de re-renderizar
-        return true;
-        */
+    bool JanelaPrincipal::ao_soltar_tecla(GdkEventKey* evento)
+    {
+        switch (evento->keyval)
+        {
+            case GDK_KEY_z:
+                this->nes->controle_1.set_botao(BotaoTipos::A, false);
+                break;
+
+            case GDK_KEY_x:
+                this->nes->controle_1.set_botao(BotaoTipos::B, false);
+                break;
+
+            case GDK_KEY_s:
+                this->nes->controle_1.set_botao(BotaoTipos::SELECT, false);
+                break;
+
+            case GDK_KEY_a:
+                this->nes->controle_1.set_botao(BotaoTipos::START, false);
+                break;
+
+            case GDK_KEY_Up:
+                this->nes->controle_1.set_botao(BotaoTipos::CIMA, false);
+                break;
+            
+            case GDK_KEY_Down:
+                this->nes->controle_1.set_botao(BotaoTipos::BAIXO, false);
+                break;
+            
+            case GDK_KEY_Left:
+                this->nes->controle_1.set_botao(BotaoTipos::ESQUERDA, false);
+                break;
+
+            case GDK_KEY_Right:
+                this->nes->controle_1.set_botao(BotaoTipos::DIREITA, false);
+                break;
+            
+            default: break;
+        }
+
+        return false;
     }
 }
