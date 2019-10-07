@@ -95,43 +95,48 @@ namespace nesbrasa::gui
 
     void JanelaPrincipal::ao_clicar_btn_abrir()
     {
-        auto dialogo = gtk_file_chooser_native_new("Abrir arquivo", nullptr, 
-                            GTK_FILE_CHOOSER_ACTION_OPEN, "_Open","_Cancel");
+        //auto dialogo = gtk_file_chooser_native_new("Abrir arquivo", nullptr, 
+           //                 GTK_FILE_CHOOSER_ACTION_OPEN, "_Open","_Cancel");
+
+        auto dialogo = Gtk::FileChooserNative::create(
+            "Abrir", 
+            *this, 
+            Gtk::FileChooserAction::FILE_CHOOSER_ACTION_OPEN, 
+            "_Open",
+            "_Cancel"
+        );
 
 #if !defined(_WIN32)
         // Filtros de tipo de arquivo não funcionam com o escolhedor de arquivo
         // padrão do windows, então os usaremos apenas em outras plataformas
 
         // Mostrar apenas os arquivos do tipo NES
-        auto filtro_nes = gtk_file_filter_new();
-        gtk_file_filter_set_name(filtro_nes, "Arquivos NES");
-        gtk_file_filter_add_mime_type(filtro_nes, "application/x-nes-rom");
-        gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialogo), filtro_nes);
+        auto filtro_nes = Gtk::FileFilter::create();
+        filtro_nes->set_name("Arquivos NES");
+        filtro_nes->add_mime_type("application/x-nes-rom");
+        dialogo->add_filter(filtro_nes);
 
         // Mostrar todos os arquivos
-        auto filtro_qualquer = gtk_file_filter_new();
-        gtk_file_filter_set_name(filtro_qualquer, "Qualquer arquivo");
-        gtk_file_filter_add_pattern(filtro_qualquer, "*");
-        gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialogo), filtro_qualquer);
+        auto filtro_qualquer = Gtk::FileFilter::create();
+        filtro_qualquer->set_name("Qualquer arquivo");
+        filtro_qualquer->add_pattern("*");
+        dialogo->add_filter(filtro_qualquer);
 #endif
 
         try 
         {
-            int resultado = gtk_native_dialog_run(GTK_NATIVE_DIALOG(dialogo));    
+            int resultado = dialogo->run(); 
             switch (resultado)
             {
-                case GTK_RESPONSE_ACCEPT:
+                case Gtk::ResponseType::RESPONSE_ACCEPT:
                 {
-                    auto c_arquivo_nome = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialogo));
-                    string arquivo_nome(c_arquivo_nome);
-                    g_free(c_arquivo_nome);
-                    
-                    auto arquivo = ler_arquivo(arquivo_nome);
+                    string arquivo_caminho = dialogo->get_filename();                    
+                    auto arquivo = ler_arquivo(arquivo_caminho);
                     nes->carregar_rom(arquivo);
                     break;
                 }
 
-                case GTK_RESPONSE_CANCEL:
+                case Gtk::ResponseType::RESPONSE_CANCEL:
                     break;
 
                 default:
@@ -149,8 +154,6 @@ namespace nesbrasa::gui
             Gtk::MessageDialog janela_dialogo(*this, "Erro ao abrir arquivo", Gtk::MessageType::MESSAGE_ERROR);
             janela_dialogo.run();
         }
-
-        g_object_unref(dialogo);
 
         // re-renderizar quadro
         this->quadro->queue_draw();
