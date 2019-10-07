@@ -95,9 +95,6 @@ namespace nesbrasa::gui
 
     void JanelaPrincipal::ao_clicar_btn_abrir()
     {
-        //auto dialogo = gtk_file_chooser_native_new("Abrir arquivo", nullptr, 
-           //                 GTK_FILE_CHOOSER_ACTION_OPEN, "_Open","_Cancel");
-
         auto dialogo = Gtk::FileChooserNative::create(
             "Abrir", 
             *this, 
@@ -217,7 +214,7 @@ namespace nesbrasa::gui
 
         auto pixels = this->pixbuf->get_pixels();
         auto textura = this->nes->ppu.get_textura();
-        for (int i = 0; i < textura.size(); i++) {
+        for (uint i = 0; i < textura.size(); i++) {
             uint32 valor = textura.at(i);
             pixels[i*3 + 0] = (valor & 0xFF0000) >> 4*4;
             pixels[i*3 + 1] = (valor & 0x00FF00) >> 4*2;
