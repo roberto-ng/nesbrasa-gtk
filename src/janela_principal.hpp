@@ -1,4 +1,4 @@
-/* nesbrasa-gtk-window.h
+/* janela_principal.hpp
  *
  * Copyright 2019 Roberto Nazareth
  *
@@ -19,7 +19,9 @@
 #pragma once
 
 #include <string>
+#include <array>
 #include <memory>
+#include <optional>
 #include <gtkmm.h>
 
 #include "nesbrasa.hpp"
@@ -27,7 +29,9 @@
 namespace nesbrasa::gui
 {
     using std::string;
-    using std::shared_ptr;
+    using std::unique_ptr;
+    using std::optional;
+    using std::array;
     using nesbrasa::nucleo::Nes;
 
     class JanelaPrincipal : public Gtk::Window
@@ -37,7 +41,10 @@ namespace nesbrasa::gui
         static const guint LARGURA;
         static const string RECURSO_CAMINHO;
         
-        shared_ptr<Nes> nes;
+        array<guint8, 256*240*3> textura;
+        Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+        unique_ptr<Nes> nes;
+        optional<double> ultimo_tempo;
 
         Glib::RefPtr<Gtk::Builder> builder;
         
@@ -60,6 +67,7 @@ namespace nesbrasa::gui
 
         void ao_clicar_btn_abrir();
         void ao_fechar_janela();
+        bool ao_atualizar(const Glib::RefPtr<Gdk::FrameClock>& frame_clock);
         bool ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr);
     };
 }

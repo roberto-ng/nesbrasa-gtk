@@ -1,4 +1,4 @@
-/* nesbrasa-gtk-window.cpp
+/* janela_principal.cpp
  *
  * Copyright 2019 Roberto Nazareth
  *
@@ -18,14 +18,16 @@
 
 #include <iostream>
 #include <gtkmm.h>
+#include <glib.h>
 
 #include "janela_principal.hpp"
 #include "arquivo.hpp"
 #include "sprites.hpp"
+#include "cores.hpp"
 
 namespace nesbrasa::gui
 {
-    using std::make_shared;
+    using std::make_unique;
     using std::runtime_error;
     using std::exception;
     using namespace std::string_literals;
@@ -37,7 +39,12 @@ namespace nesbrasa::gui
     JanelaPrincipal::JanelaPrincipal():
         Glib::ObjectBase("JanelaPrincipal")
     {
-        this->nes = make_shared<Nes>();
+        const int nes_tela_largura = 256;
+        const int nes_tela_altura = 240;
+
+        this->nes = make_unique<Nes>();
+        this->ultimo_tempo = std::nullopt;
+        this->pixbuf = Gdk::Pixbuf::create(Gdk::Colorspace::COLORSPACE_RGB, false, 8, nes_tela_largura, nes_tela_altura);
 
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
         this->builder->get_widget("raiz", this->raiz);
@@ -79,6 +86,7 @@ namespace nesbrasa::gui
         this->barra_mi_abrir->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
 
         this->quadro->signal_draw().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_desenhar_quadro));
+        this->quadro->add_tick_callback(sigc::mem_fun(*this, &JanelaPrincipal::ao_atualizar));
     }
 
     void JanelaPrincipal::ao_clicar_btn_abrir()
@@ -150,12 +158,86 @@ namespace nesbrasa::gui
         this->close();
     }
 
+    bool JanelaPrincipal::ao_atualizar(const Glib::RefPtr<Gdk::FrameClock>& frame_clock)
+    {
+        const int nes_tela_largura = 256;
+        const int nes_tela_altura = 240;
+        const int nes_pixels_qtd = nes_tela_largura * nes_tela_altura;
+        double tempo = static_cast<double>(frame_clock->get_frame_time()) / 1000000.0;
+
+        if (!this->nes->is_programa_carregado)
+        {
+            this->ultimo_tempo = tempo;
+            return G_SOURCE_CONTINUE;
+        }
+        
+        if (!this->ultimo_tempo.has_value())
+        {
+            this->ultimo_tempo = frame_clock->get_frame_time();
+            return G_SOURCE_CONTINUE;
+        }
+
+        double delta = tempo - this->ultimo_tempo.value();
+        this->ultimo_tempo = tempo;
+
+        if (delta > 1.0)
+            delta = 0.0;
+
+        //this->nes->avancar_por(delta);
+        int ciclos = (341 * 262 / 3) | 0;
+        for (int i = 0; i < ciclos; i++)
+        {
+            this->nes->avancar();
+        }
+
+        /*
+        this->pixbuf = Gdk::Pixbuf::create_from_data(this->textura.data(), Gdk::COLORSPACE_RGB, 
+                                                     false, 8, nes_tela_largura, nes_tela_altura, 
+                                                     nes_tela_largura*3);
+        */
+        this->quadro->queue_draw();
+        return G_SOURCE_CONTINUE;
+    }
+
     // Sinal ativado quando é necessário renderizar o quadro.
     // Renderiza uma textura na tela
     bool JanelaPrincipal::ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr)
     {
-        const int largura = this->quadro->get_allocation().get_width();
-        const int altura = this->quadro->get_allocation().get_height();
+        if (!this->nes->is_programa_carregado)
+        {
+            return false;
+        }
+
+        const int nes_tela_largura = 256;
+        const int nes_tela_altura = 240;
+        const int nes_pixels_qtd = nes_tela_largura * nes_tela_altura;
+
+        auto textura = this->nes->ppu.get_textura();
+        auto pixels = this->pixbuf->get_pixels();
+
+        for (int y = 0; y < nes_tela_altura; y++) 
+        {
+            for (int x = 0; x < nes_tela_largura; x++) 
+            {
+                uint ptr = y * nes_tela_largura + x;
+                byte valor = textura.at(ptr);
+                auto cor_rgb = nucleo::cores::buscar_cor_rgb(valor);
+
+                ptr *= 3;
+                pixels[ptr] = cor_rgb.at(0);
+                pixels[ptr+1] = cor_rgb.at(1);
+                pixels[ptr+2] = cor_rgb.at(2);
+            }
+	    }
+
+        //const int largura = this->quadro->get_allocation().get_width();
+        //const int altura = this->quadro->get_allocation().get_height();
+        Gdk::Cairo::set_source_pixbuf(cr, this->pixbuf, 0, 0);
+        cr->rectangle(0, 0, this->pixbuf->get_width(), this->pixbuf->get_height());
+        cr->fill();
+        return false;
+
+        /*
 
         if (!this->nes->programa_carregado)
         {
@@ -213,5 +295,6 @@ namespace nesbrasa::gui
         
         // retornar true para parar de re-renderizar
         return true;
+        */
     }
 }
