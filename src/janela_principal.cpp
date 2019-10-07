@@ -165,31 +165,14 @@ namespace nesbrasa::gui
     // Função chamada uma vez a cada frame do monitor
     bool JanelaPrincipal::ao_atualizar(const Glib::RefPtr<Gdk::FrameClock>& frame_clock)
     {
-        //double tempo = static_cast<double>(frame_clock->get_frame_time()) / 1000000.0;
-
         if (!this->nes->is_programa_carregado)
         {
-            //this->ultimo_tempo = tempo;
             return G_SOURCE_CONTINUE;
         }
 
         // dar foco ao quadro
         this->quadro->grab_focus();
         
-        /*
-        if (!this->ultimo_tempo.has_value())
-        {
-            this->ultimo_tempo = frame_clock->get_frame_time();
-            return G_SOURCE_CONTINUE;
-        }
-
-        double delta = tempo - this->ultimo_tempo.value();
-        this->ultimo_tempo = tempo;
-
-        if (delta > 1.0)
-            delta = 0.0;
-        */
-
         int ciclos = 35464; 
         for (int i = 0; i < ciclos; i++)
         {
