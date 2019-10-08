@@ -89,7 +89,7 @@ modules:
   builddir: true
   buildsystem: meson
   build-options:
-    cxxflags: "-O2 -g -std=c++17"
+    cxxflags: "-O2 -g -std=c++17 -lstdc++fs"
     env:
       CC: 'clang'
       CXX: 'clang++'
