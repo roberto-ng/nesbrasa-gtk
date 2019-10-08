@@ -24,7 +24,7 @@
 #include <optional>
 #include <gtkmm.h>
 
-#include "nesbrasa.hpp"
+#include <nesbrasa.hpp>
 
 namespace nesbrasa::gui
 {
@@ -41,10 +41,8 @@ namespace nesbrasa::gui
         static const guint LARGURA;
         static const string RECURSO_CAMINHO;
         
-        array<guint8, 256*240*3> textura;
-        Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+        Glib::RefPtr<Gdk::Pixbuf> textura_tela;
         unique_ptr<Nes> nes;
-        optional<double> ultimo_tempo;
 
         Glib::RefPtr<Gtk::Builder> builder;
         

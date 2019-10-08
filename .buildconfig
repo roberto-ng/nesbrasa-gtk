@@ -1,0 +1,11 @@
+[default]
+name=Default
+runtime=host
+toolchain=default
+config-opts=
+run-opts=
+prefix=/home/roberto/.var/app/org.gnome.Builder/cache/gnome-builder/install/nesbrasa-gtk/host
+app-id=
+postbuild=
+prebuild=
+default=true

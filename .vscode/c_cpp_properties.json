@@ -31,7 +31,8 @@
                 "/usr/include/gtkmm-3.0",
                 "/usr/local/include/nesbrasa",
                 "/usr/include/gtkmm-3.0",
-                "/usr/include/gtkmm-3.0"
+                "/usr/include/gtkmm-3.0",
+                "/usr/local/include/"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

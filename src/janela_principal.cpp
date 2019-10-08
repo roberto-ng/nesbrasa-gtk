@@ -17,18 +17,19 @@
  */
 
 #include <iostream>
+#include <filesystem>
+#include <sstream>
 #include <gtkmm.h>
 #include <glib.h>
+#include "arquivo.hpp"
 
 #include "janela_principal.hpp"
-#include "arquivo.hpp"
-#include "sprites.hpp"
-#include "cores.hpp"
 
 namespace nesbrasa::gui
 {
     using std::make_unique;
     using std::runtime_error;
+    using std::stringstream;
     using std::exception;
     using nucleo::BotaoTipos;
     using namespace std::string_literals;
@@ -37,15 +38,14 @@ namespace nesbrasa::gui
     const guint JanelaPrincipal::LARGURA = 400;
     const string JanelaPrincipal::RECURSO_CAMINHO = "/nesbrasa/nesbrasa/emu/janela_principal.ui";
 
+    static const double NES_TELA_LARGURA = 256;
+    static const double NES_TELA_ALTURA = 240;
+
     JanelaPrincipal::JanelaPrincipal():
         Glib::ObjectBase("JanelaPrincipal")
     {
-        const int nes_tela_largura = 256;
-        const int nes_tela_altura = 240;
-
         this->nes = make_unique<Nes>();
-        this->ultimo_tempo = std::nullopt;
-        this->pixbuf = Gdk::Pixbuf::create(Gdk::Colorspace::COLORSPACE_RGB, false, 8, nes_tela_largura, nes_tela_altura);
+        this->textura_tela = Gdk::Pixbuf::create(Gdk::Colorspace::COLORSPACE_RGB, false, 8, NES_TELA_LARGURA, NES_TELA_ALTURA);
 
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
         this->builder->get_widget("raiz", this->raiz);
@@ -104,8 +104,7 @@ namespace nesbrasa::gui
         );
 
 #if !defined(_WIN32)
-        // Filtros de tipo de arquivo não funcionam com o escolhedor de arquivo
-        // padrão do windows, então os usaremos apenas em outras plataformas
+        // Filtros de tipo de arquivo do GTK não funcionam no Windows
 
         // Mostrar apenas os arquivos do tipo NES
         auto filtro_nes = Gtk::FileFilter::create();
@@ -127,9 +126,16 @@ namespace nesbrasa::gui
             {
                 case Gtk::ResponseType::RESPONSE_ACCEPT:
                 {
-                    string arquivo_caminho = dialogo->get_filename();                    
-                    auto arquivo = ler_arquivo(arquivo_caminho);
+                    std::filesystem::path caminho(dialogo->get_filename());     
+                    
+                    auto arquivo = ler_arquivo(caminho.generic_string());
                     nes->carregar_rom(arquivo);
+
+                    // adicionar o nome do arquivo ao titulo da janela sem sua extenção 
+                    stringstream janela_titulo;
+                    janela_titulo << "Nesbrasa - " << caminho.stem();
+                    this->set_title(janela_titulo.str());
+
                     break;
                 }
 
@@ -143,12 +149,12 @@ namespace nesbrasa::gui
         }
         catch (const exception& e)
         {
-            Gtk::MessageDialog janela_dialogo(*this, e.what(), Gtk::MessageType::MESSAGE_ERROR);
+            Gtk::MessageDialog janela_dialogo(*this, e.what());
             janela_dialogo.run();
         }
         catch (...)
         {
-            Gtk::MessageDialog janela_dialogo(*this, "Erro ao abrir arquivo", Gtk::MessageType::MESSAGE_ERROR);
+            Gtk::MessageDialog janela_dialogo(*this, "Erro ao abrir arquivo");
             janela_dialogo.run();
         }
 
@@ -183,8 +189,7 @@ namespace nesbrasa::gui
         return G_SOURCE_CONTINUE;
     }
 
-    // Sinal ativado quando é necessário renderizar o quadro.
-    // Renderiza uma textura na tela
+    // Função chamada quando é necessário renderizar o quadro.
     bool JanelaPrincipal::ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr)
     {
         if (!this->nes->is_programa_carregado)
@@ -192,10 +197,7 @@ namespace nesbrasa::gui
             return false;
         }
 
-        const double nes_tela_largura = 256;
-        const double nes_tela_altura = 240;
-
-        auto pixels = this->pixbuf->get_pixels();
+        auto pixels = this->textura_tela->get_pixels();
         auto textura = this->nes->ppu.get_textura();
         for (uint i = 0; i < textura.size(); i++) {
             uint32 valor = textura.at(i);
@@ -213,29 +215,28 @@ namespace nesbrasa::gui
         double pos_x = 0;
         double pos_y = 0;
 
-        if (altura > largura)
-        {
-            // se a altura for maior que a largura 
-            escala = largura/nes_tela_largura;
-            largura_escalada = largura;
-            altura_escalada = nes_tela_altura*escala;
-            
-            // centralizar verticalmente
-            pos_y = (altura - altura_escalada) / 2.0;
-        }
-        else
+        if (largura > altura)
         {
             // se a largura for maior ou igual que a altura
-            escala = altura/nes_tela_altura;
-            largura_escalada = nes_tela_largura*escala;
+            escala = altura/NES_TELA_ALTURA;
+            largura_escalada = NES_TELA_LARGURA*escala;
             altura_escalada = altura;
             
             // centralizar horizontalmente
             pos_x = (largura - largura_escalada) / 2.0;
         }
+        else
+        {
+            // se a altura for maior que a largura 
+            escala = largura/NES_TELA_LARGURA;
+            largura_escalada = largura;
+            altura_escalada = NES_TELA_ALTURA*escala;
+            
+            // centralizar verticalmente
+            pos_y = (altura - altura_escalada) / 2.0;
+        }
 
-
-        auto pixbuf_escalado = pixbuf->scale_simple(
+        auto textura_escalada = this->textura_tela->scale_simple(
             largura_escalada, 
             altura_escalada, 
             Gdk::InterpType::INTERP_NEAREST
@@ -246,9 +247,10 @@ namespace nesbrasa::gui
         estilo->render_background(cr, 0, 0, largura, altura);
 
         // renderizar o buffer da tela
-        Gdk::Cairo::set_source_pixbuf(cr, pixbuf_escalado, pos_x, pos_y);
-        cr->rectangle(pos_x, pos_y, pixbuf_escalado->get_width(), pixbuf_escalado->get_height());
+        Gdk::Cairo::set_source_pixbuf(cr, textura_escalada, pos_x, pos_y);
+        cr->rectangle(pos_x, pos_y, textura_escalada->get_width(), textura_escalada->get_height());
         cr->fill();
+
         return false;
     }
 
