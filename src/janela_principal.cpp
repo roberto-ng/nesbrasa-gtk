@@ -20,8 +20,8 @@
 #include <sstream>
 #include <gtkmm.h>
 #include <glib.h>
-#include "arquivo.hpp"
 
+#include "arquivo.hpp"
 #include "janela_principal.hpp"
 
 namespace nesbrasa::gui
@@ -30,7 +30,7 @@ namespace nesbrasa::gui
     using std::runtime_error;
     using std::stringstream;
     using std::exception;
-    using nucleo::BotaoTipos;
+    using nucleo::Botao;
     using namespace std::string_literals;
 
     const guint JanelaPrincipal::ALTURA = 600;
@@ -252,35 +252,35 @@ namespace nesbrasa::gui
         switch (evento->keyval)
         {
             case GDK_KEY_z:
-                this->nes->controle_1.set_botao(BotaoTipos::A, true);
+                this->nes->controle_1.set_valor(Botao::A, true);
                 break;
 
             case GDK_KEY_x:
-                this->nes->controle_1.set_botao(BotaoTipos::B, true);
+                this->nes->controle_1.set_valor(Botao::B, true);
                 break;
 
             case GDK_KEY_s:
-                this->nes->controle_1.set_botao(BotaoTipos::SELECT, true);
+                this->nes->controle_1.set_valor(Botao::SELECT, true);
                 break;
 
             case GDK_KEY_a:
-                this->nes->controle_1.set_botao(BotaoTipos::START, true);
+                this->nes->controle_1.set_valor(Botao::START, true);
                 break;
 
             case GDK_KEY_Up:
-                this->nes->controle_1.set_botao(BotaoTipos::CIMA, true);
+                this->nes->controle_1.set_valor(Botao::CIMA, true);
                 break;
             
             case GDK_KEY_Down:
-                this->nes->controle_1.set_botao(BotaoTipos::BAIXO, true);
+                this->nes->controle_1.set_valor(Botao::BAIXO, true);
                 break;
             
             case GDK_KEY_Left:
-                this->nes->controle_1.set_botao(BotaoTipos::ESQUERDA, true);
+                this->nes->controle_1.set_valor(Botao::ESQUERDA, true);
                 break;
 
             case GDK_KEY_Right:
-                this->nes->controle_1.set_botao(BotaoTipos::DIREITA, true);
+                this->nes->controle_1.set_valor(Botao::DIREITA, true);
                 break;
             
             default: break;
@@ -294,35 +294,35 @@ namespace nesbrasa::gui
         switch (evento->keyval)
         {
             case GDK_KEY_z:
-                this->nes->controle_1.set_botao(BotaoTipos::A, false);
+                this->nes->controle_1.set_valor(Botao::A, false);
                 break;
 
             case GDK_KEY_x:
-                this->nes->controle_1.set_botao(BotaoTipos::B, false);
+                this->nes->controle_1.set_valor(Botao::B, false);
                 break;
 
             case GDK_KEY_s:
-                this->nes->controle_1.set_botao(BotaoTipos::SELECT, false);
+                this->nes->controle_1.set_valor(Botao::SELECT, false);
                 break;
 
             case GDK_KEY_a:
-                this->nes->controle_1.set_botao(BotaoTipos::START, false);
+                this->nes->controle_1.set_valor(Botao::START, false);
                 break;
 
             case GDK_KEY_Up:
-                this->nes->controle_1.set_botao(BotaoTipos::CIMA, false);
+                this->nes->controle_1.set_valor(Botao::CIMA, false);
                 break;
             
             case GDK_KEY_Down:
-                this->nes->controle_1.set_botao(BotaoTipos::BAIXO, false);
+                this->nes->controle_1.set_valor(Botao::BAIXO, false);
                 break;
             
             case GDK_KEY_Left:
-                this->nes->controle_1.set_botao(BotaoTipos::ESQUERDA, false);
+                this->nes->controle_1.set_valor(Botao::ESQUERDA, false);
                 break;
 
             case GDK_KEY_Right:
-                this->nes->controle_1.set_botao(BotaoTipos::DIREITA, false);
+                this->nes->controle_1.set_valor(Botao::DIREITA, false);
                 break;
             
             default: break;
