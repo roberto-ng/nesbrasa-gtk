@@ -17,7 +17,6 @@
  */
 
 #include <iostream>
-#include <filesystem>
 #include <sstream>
 #include <gtkmm.h>
 #include <glib.h>
@@ -126,15 +125,9 @@ namespace nesbrasa::gui
             {
                 case Gtk::ResponseType::RESPONSE_ACCEPT:
                 {
-                    std::filesystem::path caminho(dialogo->get_filename());     
-                    
-                    auto arquivo = ler_arquivo(caminho.generic_string());
+                    string caminho = dialogo->get_filename();                    
+                    auto arquivo = ler_arquivo(caminho);
                     nes->carregar_rom(arquivo);
-
-                    // adicionar o nome do arquivo ao titulo da janela sem sua extenção 
-                    stringstream janela_titulo;
-                    janela_titulo << "Nesbrasa - " << caminho.stem();
-                    this->set_title(janela_titulo.str());
 
                     break;
                 }
