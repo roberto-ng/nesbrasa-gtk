@@ -20,11 +20,14 @@ ninja
 ## Screenshots
 
 ### nestest.nes
-[logo]: screenshots/nestest.png "nestest.nes"
+![alt text1][nestest]
 
 ### Star Gate
-[logo]: screenshots/star_gate.png "Star Gate"
-
+![alt text1][star]
 
 ### Ice Climber
-[logo]: screenshots/ice_climber.png "Ice Climber"
+![alt text1][ice]
+
+[nestest]: screenshots/nestest.png "nestest.nes"
+[star]: screenshots/star_gate.png "Star Gate"
+[ice]: screenshots/ice_climber.png "Ice Climber"
