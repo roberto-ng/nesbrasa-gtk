@@ -172,7 +172,7 @@ namespace nesbrasa::gui
         // dar foco ao quadro
         this->quadro->grab_focus();
         
-        int ciclos = 35464; 
+        const int ciclos = 29780; 
         for (int i = 0; i < ciclos; i++)
         {
             this->nes->avancar();
@@ -259,11 +259,11 @@ namespace nesbrasa::gui
                 this->nes->controle_1.set_valor(Botao::B, true);
                 break;
 
-            case GDK_KEY_s:
+            case GDK_KEY_BackSpace:
                 this->nes->controle_1.set_valor(Botao::SELECT, true);
                 break;
 
-            case GDK_KEY_a:
+            case GDK_KEY_Return:
                 this->nes->controle_1.set_valor(Botao::START, true);
                 break;
 
@@ -301,11 +301,11 @@ namespace nesbrasa::gui
                 this->nes->controle_1.set_valor(Botao::B, false);
                 break;
 
-            case GDK_KEY_s:
+            case GDK_KEY_BackSpace:
                 this->nes->controle_1.set_valor(Botao::SELECT, false);
                 break;
 
-            case GDK_KEY_a:
+            case GDK_KEY_Return:
                 this->nes->controle_1.set_valor(Botao::START, false);
                 break;
 

@@ -39,7 +39,8 @@
       <object class="GtkButton" id="btn_abrir">
         <property name="label" translatable="yes">Abrir</property>
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
+        <property name="can_focus">False</property>
+        <property name="focus_on_click">False</property>
         <property name="receives_default">True</property>
       </object>
       <packing>
@@ -49,7 +50,8 @@
     <child>
       <object class="GtkMenuButton" id="btn_menu">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
+        <property name="can_focus">False</property>
+        <property name="focus_on_click">False</property>
         <property name="receives_default">True</property>
         <property name="relief">half</property>
         <property name="draw_indicator">True</property>
@@ -158,7 +160,9 @@
             <child>
               <object class="GtkDrawingArea" id="quadro">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
+                <property name="is_focus">True</property>
+                <property name="receives_default">True</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
               </object>
