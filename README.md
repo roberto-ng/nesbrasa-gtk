@@ -1,7 +1,7 @@
 # Nesbrasa 
 ## Emulador de NES e Famicom para Windows e GNU/Linux
 
-Repisitório da biblioteca núcleo: https://gitlab.com/robertonazareth/nesbrasa
+Repisitório da biblioteca núcleo: https://github.com/roberto-ng/nesbrasa
 
 ### Dependências:
 * Compilador para C++17

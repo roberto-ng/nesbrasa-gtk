@@ -95,5 +95,5 @@ modules:
       CXX: 'clang++'
   sources:
   - type: git
-    url: https://gitlab.com/robertonazareth/nesbrasa-gtk
+    url: https://github.com/roberto-ng/nesbrasa-gtk
 
