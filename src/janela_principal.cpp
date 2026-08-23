@@ -172,10 +172,14 @@ namespace nesbrasa::gui
         // dar foco ao quadro
         this->quadro->grab_focus();
         
-        const int ciclos = 29780; 
-        for (int i = 0; i < ciclos; i++)
+        // Nes::avancar executa uma instrução completa e retorna quantos
+        // ciclos de CPU ela consumiu. Avançar um número fixo de instruções
+        // fazia a emulação correr várias vezes mais rápido que um quadro.
+        const int ciclos_por_quadro = 29780;
+        int ciclos = 0;
+        while (ciclos < ciclos_por_quadro)
         {
-            this->nes->avancar();
+            ciclos += this->nes->avancar();
         }
 
         this->quadro->queue_draw();
