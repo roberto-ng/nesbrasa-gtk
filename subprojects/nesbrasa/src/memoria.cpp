@@ -136,7 +136,12 @@ namespace nesbrasa::nucleo
         }
         else if (endereco >= 0x4000 && endereco <= 0x4017)
         {
-            if (endereco == 0x4016)
+            // $4014 is the PPU OAM DMA register, not an APU register.
+            if (endereco == 0x4014)
+            {
+                this->nes->ppu.registrador_escrever(nes, endereco, valor);
+            }
+            else if (endereco == 0x4016)
             {
                 this->nes->controle_1.escrever(valor);
                 this->nes->controle_2.escrever(valor);

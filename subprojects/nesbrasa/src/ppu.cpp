@@ -36,6 +36,8 @@ namespace nesbrasa::nucleo
         this->ultimo_valor = 0;
         this->vram_incrementar = 0;
         this->oam_endereco = 0;
+        // Keep unused sprites off-screen until the game populates OAM.
+        this->oam.fill(0xFF);
 
         this->tile_dados = 0;
         this->tile_byte_maior = 0;
