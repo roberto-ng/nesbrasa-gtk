@@ -83,6 +83,15 @@ export default function App() {
   };
 
   const handleKey = (event: KeyboardEvent, pressed: boolean) => {
+    const selected = capturing();
+    if (selected) {
+      event.preventDefault();
+      if (pressed && !event.repeat) {
+        if (event.key === 'Escape') setCapturing();
+        else assignKey(selected, event.code);
+      }
+      return;
+    }
     if (view() !== 'play' || event.repeat) return;
     const control = controls.find((item) => controlsState()[item.id] === event.code);
     if (!control || !emulator()) return;
@@ -163,7 +172,7 @@ export default function App() {
             <For each={controls}>{(control) =>
               <div class="control-row">
                 <span>{control.label}</span>
-                <button type="button" class={capturing() === control.id ? 'capturing' : ''} onClick={() => setCapturing(control.id)} onKeyDown={(event) => { event.preventDefault(); if (event.key === 'Escape') setCapturing(); else assignKey(control.id, event.code); }}>
+                <button type="button" class={capturing() === control.id ? 'capturing' : ''} onClick={() => setCapturing(control.id)}>
                   {capturing() === control.id ? 'Press a key…' : (keyLabel(controlsState()[control.id]) || 'Unassigned')}
                 </button>
               </div>
