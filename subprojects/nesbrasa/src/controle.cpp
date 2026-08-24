@@ -22,6 +22,7 @@ namespace nesbrasa::nucleo
 {
     Controle::Controle()
     {
+        this->buffer_botoes.fill(false);
         this->indice = 0;
         this->sinal = false;
     }
@@ -34,7 +35,7 @@ namespace nesbrasa::nucleo
             valor = 1;
         }
 
-        if (this->sinal%1 == 1)
+        if ((this->sinal & 1) != 0)
         {
             this->indice = 0;
         }
@@ -50,7 +51,7 @@ namespace nesbrasa::nucleo
     {
         this->sinal = valor;
 
-        if (this->sinal%1 == 1)
+        if ((this->sinal & 1) != 0)
         {
             this->indice = 0;
         }
