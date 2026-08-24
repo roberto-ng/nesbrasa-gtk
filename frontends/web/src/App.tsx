@@ -58,6 +58,7 @@ function keyLabel(code: string): string {
 
 export default function App() {
   let canvas: HTMLCanvasElement | undefined;
+  let screenWrap: HTMLElement | undefined;
   const [view, setView] = createSignal<View>('play');
   const [status, setStatus] = createSignal('No ROM loaded');
   const [paused, setPaused] = createSignal(false);
@@ -65,6 +66,7 @@ export default function App() {
   const [capturing, setCapturing] = createSignal<ControlId>();
   const [emulator, setEmulator] = createSignal<WasmNes>();
   const [wasm, setWasm] = createSignal<WasmModule>();
+  const [fullscreen, setFullscreen] = createSignal(false);
   let frameRequest = 0;
 
   const persistControls = (next: Record<ControlId, string>) => {
@@ -131,6 +133,11 @@ export default function App() {
     }
   };
 
+  const toggleFullscreen = async () => {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await screenWrap?.requestFullscreen();
+  };
+
   onMount(async () => {
     const wasmUrl = new URL('/nesbrasa.js', window.location.origin).href;
     const module = (await import(/* @vite-ignore */ wasmUrl)) as unknown as { default: () => Promise<WasmModule> };
@@ -141,9 +148,12 @@ export default function App() {
     const keyUp = (event: KeyboardEvent) => handleKey(event, false);
     window.addEventListener('keydown', keyDown);
     window.addEventListener('keyup', keyUp);
+    const fullscreenChanged = () => setFullscreen(document.fullscreenElement === screenWrap);
+    document.addEventListener('fullscreenchange', fullscreenChanged);
     onCleanup(() => {
       window.removeEventListener('keydown', keyDown);
       window.removeEventListener('keyup', keyUp);
+      document.removeEventListener('fullscreenchange', fullscreenChanged);
       cancelAnimationFrame(frameRequest);
     });
   });
@@ -158,6 +168,7 @@ export default function App() {
             {paused() ? 'Resume' : 'Pause'}
           </button>
           <output>{status()}</output>
+          <button type="button" onClick={toggleFullscreen}>{fullscreen() ? 'Exit full screen' : 'Full screen'}</button>
         </Show>
         <button type="button" onClick={() => setView(view() === 'play' ? 'settings' : 'play')}>
           {view() === 'play' ? 'Settings' : 'Back to emulator'}
@@ -181,7 +192,7 @@ export default function App() {
           <button type="button" onClick={() => persistControls({ ...defaults })}>Restore defaults</button>
         </section>
       }>
-        <section class="screen-wrap" aria-label="NES screen">
+        <section ref={screenWrap} class="screen-wrap" aria-label="NES screen">
           <canvas ref={canvas} width="256" height="240" />
         </section>
         <p class="help">Keyboard controls can be changed in Settings.</p>
