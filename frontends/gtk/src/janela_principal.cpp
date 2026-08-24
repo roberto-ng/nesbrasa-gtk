@@ -18,8 +18,18 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
+#include <limits.h>
 #include <gtkmm.h>
 #include <glib.h>
+
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#endif
 
 #include "arquivo.hpp"
 #include "janela_principal.hpp"
@@ -30,8 +40,51 @@ namespace nesbrasa::gui
     using std::runtime_error;
     using std::stringstream;
     using std::exception;
+    using std::ifstream;
+    using std::ofstream;
     using nucleo::Botao;
     using namespace std::string_literals;
+
+    static const array<guint, 8> TECLAS_PADRAO = {
+        GDK_KEY_z, GDK_KEY_x, GDK_KEY_BackSpace, GDK_KEY_Return,
+        GDK_KEY_Up, GDK_KEY_Down, GDK_KEY_Left, GDK_KEY_Right,
+    };
+
+    static const array<string, 8> NOMES_BOTOES = {
+        "A", "B", "Select", "Start", "Cima", "Baixo", "Esquerda", "Direita",
+    };
+
+    static std::filesystem::path obter_diretorio_executavel()
+    {
+        try
+        {
+#if defined(__APPLE__)
+            uint32_t tamanho = 0;
+            _NSGetExecutablePath(nullptr, &tamanho);
+            string caminho(tamanho, '\0');
+            if (_NSGetExecutablePath(caminho.data(), &tamanho) == 0)
+                return std::filesystem::path(caminho.c_str()).parent_path();
+#elif defined(__linux__)
+            array<char, PATH_MAX> caminho = {};
+            const auto tamanho = readlink("/proc/self/exe", caminho.data(), caminho.size() - 1);
+            if (tamanho > 0)
+            {
+                caminho[tamanho] = '\0';
+                return std::filesystem::path(caminho.data()).parent_path();
+            }
+#elif defined(_WIN32)
+            array<char, MAX_PATH> caminho = {};
+            const auto tamanho = GetModuleFileNameA(nullptr, caminho.data(), caminho.size());
+            if (tamanho > 0)
+                return std::filesystem::path(caminho.data()).parent_path();
+#endif
+        }
+        catch (...)
+        {
+        }
+
+        return std::filesystem::current_path();
+    }
 
     const guint JanelaPrincipal::ALTURA = 600;
     const guint JanelaPrincipal::LARGURA = 400;
@@ -44,6 +97,9 @@ namespace nesbrasa::gui
         Glib::ObjectBase("JanelaPrincipal")
     {
         this->nes = make_unique<Nes>();
+        this->teclas = TECLAS_PADRAO;
+        this->caminho_configuracao = obter_diretorio_executavel() / "nesbrasa-controls.conf";
+        this->carregar_configuracoes();
         this->textura_tela = Gdk::Pixbuf::create(Gdk::Colorspace::COLORSPACE_RGB, false, 8, NES_TELA_LARGURA, NES_TELA_ALTURA);
 
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
@@ -53,7 +109,9 @@ namespace nesbrasa::gui
         this->builder->get_widget("headerbar", this->headerbar);
         this->builder->get_widget("barra_menu", this->barra_menu);
         this->builder->get_widget("menu_item_sair", this->menu_item_sair);
+        this->builder->get_widget("menu_item_configuracoes", this->menu_item_configuracoes);
         this->builder->get_widget("barra_mi_sair", this->barra_mi_sair);
+        this->builder->get_widget("barra_mi_configuracoes", this->barra_mi_configuracoes);
         this->builder->get_widget("btn_abrir", this->btn_abrir);
         this->builder->get_widget("barra_mi_abrir", this->barra_mi_abrir);
 
@@ -81,6 +139,8 @@ namespace nesbrasa::gui
 
         this->menu_item_sair->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_fechar_janela));
         this->barra_mi_sair->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_fechar_janela));
+        this->menu_item_configuracoes->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::abrir_configuracoes));
+        this->barra_mi_configuracoes->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::abrir_configuracoes));
 
         this->btn_abrir->signal_clicked().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
         this->barra_mi_abrir->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
@@ -162,6 +222,112 @@ namespace nesbrasa::gui
     {
         // fechar janela
         this->close();
+    }
+
+    void JanelaPrincipal::carregar_configuracoes()
+    {
+        try
+        {
+            ifstream arquivo(this->caminho_configuracao);
+            for (guint i = 0; i < this->teclas.size(); ++i)
+            {
+                guint tecla = 0;
+                if (!(arquivo >> tecla))
+                    break;
+                if (tecla != 0)
+                    this->teclas[i] = tecla;
+            }
+        }
+        catch (...)
+        {
+            this->teclas = TECLAS_PADRAO;
+        }
+    }
+
+    void JanelaPrincipal::salvar_configuracoes()
+    {
+        try
+        {
+            ofstream arquivo(this->caminho_configuracao, std::ios::trunc);
+            if (!arquivo)
+                return;
+            for (guint i = 0; i < this->teclas.size(); ++i)
+            {
+                arquivo << this->teclas[i] << '\n';
+            }
+        }
+        catch (...)
+        {
+            // Config persistence is optional when running without installed schemas.
+        }
+    }
+
+    void JanelaPrincipal::abrir_configuracoes()
+    {
+        Gtk::Dialog dialogo("Configurações", *this, true);
+        dialogo.add_button("Cancelar", Gtk::ResponseType::RESPONSE_CANCEL);
+        dialogo.add_button("Aplicar", Gtk::ResponseType::RESPONSE_OK);
+
+        auto& conteudo = *dialogo.get_content_area();
+        Gtk::Grid grade;
+        grade.set_row_spacing(8);
+        grade.set_column_spacing(16);
+        conteudo.pack_start(grade, Gtk::PACK_SHRINK);
+
+        array<Gtk::Button*, 8> botoes = {};
+        auto atualizar_rotulos = [&]() {
+            for (guint i = 0; i < botoes.size(); ++i)
+            {
+                const char* nome = gdk_keyval_name(this->teclas[i]);
+                botoes[i]->set_label(nome != nullptr ? nome : "Nenhuma");
+            }
+        };
+
+        for (guint i = 0; i < NOMES_BOTOES.size(); ++i)
+        {
+            auto* nome = Gtk::manage(new Gtk::Label(NOMES_BOTOES[i]));
+            auto* botao = Gtk::manage(new Gtk::Button());
+            botoes[i] = botao;
+            botao->set_can_focus(true);
+            botao->add_events(Gdk::KEY_PRESS_MASK);
+            botao->signal_key_press_event().connect([&, i](GdkEventKey* evento) {
+                this->teclas[i] = evento->keyval;
+                atualizar_rotulos();
+                return true;
+            }, false);
+            grade.attach(*nome, 0, i, 1, 1);
+            grade.attach(*botao, 1, i, 1, 1);
+        }
+
+        auto* restaurar = Gtk::manage(new Gtk::Button("Restaurar padrões"));
+        restaurar->signal_clicked().connect([&, this]() {
+            this->teclas = TECLAS_PADRAO;
+            atualizar_rotulos();
+        });
+        grade.attach(*restaurar, 0, NOMES_BOTOES.size(), 2, 1);
+        atualizar_rotulos();
+        dialogo.show_all();
+
+        if (dialogo.run() == Gtk::ResponseType::RESPONSE_OK)
+        {
+            this->salvar_configuracoes();
+        }
+        else
+        {
+            this->carregar_configuracoes();
+        }
+    }
+
+    void JanelaPrincipal::atualizar_controle(guint tecla, bool pressionado)
+    {
+        for (guint i = 0; i < this->teclas.size(); ++i)
+        {
+            if (this->teclas[i] == tecla)
+            {
+                this->nes->set_botao(static_cast<Botao>(i), pressionado);
+                return;
+            }
+        }
     }
 
     // Função chamada uma vez a cada frame do monitor
@@ -251,84 +417,14 @@ namespace nesbrasa::gui
 
     bool JanelaPrincipal::ao_pressionar_tecla(GdkEventKey* evento)
     {
-        switch (evento->keyval)
-        {
-            case GDK_KEY_z:
-                this->nes->set_botao(Botao::A, true);
-                break;
-
-            case GDK_KEY_x:
-                this->nes->set_botao(Botao::B, true);
-                break;
-
-            case GDK_KEY_BackSpace:
-                this->nes->set_botao(Botao::SELECT, true);
-                break;
-
-            case GDK_KEY_Return:
-                this->nes->set_botao(Botao::START, true);
-                break;
-
-            case GDK_KEY_Up:
-                this->nes->set_botao(Botao::CIMA, true);
-                break;
-            
-            case GDK_KEY_Down:
-                this->nes->set_botao(Botao::BAIXO, true);
-                break;
-            
-            case GDK_KEY_Left:
-                this->nes->set_botao(Botao::ESQUERDA, true);
-                break;
-
-            case GDK_KEY_Right:
-                this->nes->set_botao(Botao::DIREITA, true);
-                break;
-            
-            default: break;
-        }
+        this->atualizar_controle(evento->keyval, true);
 
         return false;
     }
 
     bool JanelaPrincipal::ao_soltar_tecla(GdkEventKey* evento)
     {
-        switch (evento->keyval)
-        {
-            case GDK_KEY_z:
-                this->nes->set_botao(Botao::A, false);
-                break;
-
-            case GDK_KEY_x:
-                this->nes->set_botao(Botao::B, false);
-                break;
-
-            case GDK_KEY_BackSpace:
-                this->nes->set_botao(Botao::SELECT, false);
-                break;
-
-            case GDK_KEY_Return:
-                this->nes->set_botao(Botao::START, false);
-                break;
-
-            case GDK_KEY_Up:
-                this->nes->set_botao(Botao::CIMA, false);
-                break;
-            
-            case GDK_KEY_Down:
-                this->nes->set_botao(Botao::BAIXO, false);
-                break;
-            
-            case GDK_KEY_Left:
-                this->nes->set_botao(Botao::ESQUERDA, false);
-                break;
-
-            case GDK_KEY_Right:
-                this->nes->set_botao(Botao::DIREITA, false);
-                break;
-            
-            default: break;
-        }
+        this->atualizar_controle(evento->keyval, false);
 
         return false;
     }

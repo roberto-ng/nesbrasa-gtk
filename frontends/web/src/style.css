@@ -1,0 +1,18 @@
+:root { color-scheme: dark; background: #121212; color: #e1e1e1; font-family: system-ui, sans-serif; }
+body { margin: 0; min-width: 320px; }
+.app { max-width: 960px; margin: 0 auto; padding: 24px; }
+.toolbar { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #333; padding-bottom: 16px; }
+h1, h2 { margin: 0; font-size: 20px; font-weight: 600; }
+h2 { font-size: 18px; }
+button, .file-button { border: 1px solid #555; border-radius: 6px; background: #242424; color: inherit; padding: 8px 12px; cursor: pointer; }
+button:disabled { cursor: default; opacity: .5; }
+.file-button input { display: none; }
+output { color: #aaa; font-size: 14px; margin-right: auto; }
+.screen-wrap { display: grid; place-items: center; margin-top: 24px; min-height: min(70vh, 600px); background: #080808; border: 1px solid #333; }
+canvas { width: min(100%, 768px); height: auto; image-rendering: pixelated; }
+.help, .settings p { color: #999; font-size: 14px; }
+.settings { max-width: 520px; margin: 32px auto; }
+.control-list { margin: 24px 0; border-top: 1px solid #333; }
+.control-row { display: grid; grid-template-columns: 1fr 160px; align-items: center; gap: 16px; padding: 10px 0; border-bottom: 1px solid #333; }
+.control-row button { text-align: center; }
+.control-row button.capturing { border-color: #ddd; color: #fff; }

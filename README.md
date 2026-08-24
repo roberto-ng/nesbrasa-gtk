@@ -28,11 +28,16 @@ necessário ter o Emscripten instalado e disponível no `PATH`:
 
 ```
 cd frontends/web
+npm install
 npm run build:wasm
+npm run build
 npm run serve
 ```
 
-Depois, abra <http://localhost:8080>.
+Depois, abra <http://localhost:4173>.
+
+Para desenvolvimento com Vite, use `npm run dev` e abra
+<http://localhost:5173>.
 
 ## Screenshots
 

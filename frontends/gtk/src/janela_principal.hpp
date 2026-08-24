@@ -22,6 +22,7 @@
 #include <array>
 #include <memory>
 #include <optional>
+#include <filesystem>
 #include <gtkmm.h>
 
 #include <nesbrasa.hpp>
@@ -50,13 +51,23 @@ namespace nesbrasa::gui
         Gtk::MenuBar*   barra_menu;
 
         Gtk::MenuItem* menu_item_sair;
+        Gtk::MenuItem* menu_item_configuracoes;
         Gtk::MenuItem* barra_mi_sair;
+        Gtk::MenuItem* barra_mi_configuracoes;
         Gtk::MenuItem* barra_mi_abrir;
         Gtk::Button*   btn_abrir;
 
         Gtk::Box*            raiz;
         Gtk::DrawingArea*    quadro;
         Gtk::ScrolledWindow* scroll;
+
+        std::array<guint, 8> teclas;
+        std::filesystem::path caminho_configuracao;
+
+        void abrir_configuracoes();
+        void atualizar_controle(guint tecla, bool pressionado);
+        void carregar_configuracoes();
+        void salvar_configuracoes();
 
     public:
         JanelaPrincipal();
