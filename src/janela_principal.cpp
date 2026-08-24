@@ -109,6 +109,9 @@ namespace nesbrasa::gui
         auto filtro_nes = Gtk::FileFilter::create();
         filtro_nes->set_name("Arquivos NES");
         filtro_nes->add_mime_type("application/x-nes-rom");
+        // macOS does not provide this MIME type, so also filter by extension.
+        filtro_nes->add_pattern("*.nes");
+        filtro_nes->add_pattern("*.NES");
         dialogo->add_filter(filtro_nes);
 
         // Mostrar todos os arquivos
