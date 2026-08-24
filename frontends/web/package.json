@@ -1,0 +1,8 @@
+{
+  "name": "nesbrasa-web",
+  "private": true,
+  "scripts": {
+    "build:wasm": "./build-wasm.sh",
+    "serve": "python3 -m http.server 8080 --directory public"
+  }
+}

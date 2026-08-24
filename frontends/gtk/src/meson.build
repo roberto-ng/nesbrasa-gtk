@@ -22,8 +22,6 @@ nesbrasa_gtk_sources += gnome.compile_resources('nesbrasa-gtk-resources',
   c_name: 'nesbrasa_gtk'
 )
 
-nesbrasa_dep = nesbrasa_proj.get_variable('nesbrasa_dep')
-
 executable('nesbrasa-gtk', nesbrasa_gtk_sources,
   dependencies: [nesbrasa_dep, nesbrasa_gtk_deps],
   link_args: ldflags,

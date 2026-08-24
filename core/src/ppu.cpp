@@ -917,4 +917,9 @@ namespace nesbrasa::nucleo
     {
         return this->frente;
     }
+
+    const array<uint32, (256*240)>& Ppu::get_textura() const
+    {
+        return this->frente;
+    }
 }

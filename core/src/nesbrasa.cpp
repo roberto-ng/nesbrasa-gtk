@@ -117,4 +117,29 @@ namespace nesbrasa::nucleo
 
         return cpu_ciclos;
     }
+
+    int Nes::avancar_quadro()
+    {
+        int ciclos = 0;
+        while (ciclos < CICLOS_POR_QUADRO)
+        {
+            ciclos += this->avancar();
+        }
+        return ciclos;
+    }
+
+    const array<uint32, (256 * 240)>& Nes::get_textura() const
+    {
+        return this->ppu.get_textura();
+    }
+
+    void Nes::set_botao(Botao botao, bool pressionado)
+    {
+        this->controle_1.set_valor(botao, pressionado);
+    }
+
+    bool Nes::programa_carregado() const
+    {
+        return this->is_programa_carregado;
+    }
 }

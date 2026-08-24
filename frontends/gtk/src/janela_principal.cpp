@@ -37,8 +37,8 @@ namespace nesbrasa::gui
     const guint JanelaPrincipal::LARGURA = 400;
     const string JanelaPrincipal::RECURSO_CAMINHO = "/nesbrasa/nesbrasa/emu/janela_principal.ui";
 
-    static const double NES_TELA_LARGURA = 256;
-    static const double NES_TELA_ALTURA = 240;
+    static const double NES_TELA_LARGURA = Nes::TELA_LARGURA;
+    static const double NES_TELA_ALTURA = Nes::TELA_ALTURA;
 
     JanelaPrincipal::JanelaPrincipal():
         Glib::ObjectBase("JanelaPrincipal")
@@ -167,7 +167,7 @@ namespace nesbrasa::gui
     // Função chamada uma vez a cada frame do monitor
     bool JanelaPrincipal::ao_atualizar(const Glib::RefPtr<Gdk::FrameClock>& frame_clock)
     {
-        if (!this->nes->is_programa_carregado)
+        if (!this->nes->programa_carregado())
         {
             return G_SOURCE_CONTINUE;
         }
@@ -178,12 +178,7 @@ namespace nesbrasa::gui
         // Nes::avancar executa uma instrução completa e retorna quantos
         // ciclos de CPU ela consumiu. Avançar um número fixo de instruções
         // fazia a emulação correr várias vezes mais rápido que um quadro.
-        const int ciclos_por_quadro = 29780;
-        int ciclos = 0;
-        while (ciclos < ciclos_por_quadro)
-        {
-            ciclos += this->nes->avancar();
-        }
+        this->nes->avancar_quadro();
 
         this->quadro->queue_draw();
         return G_SOURCE_CONTINUE;
@@ -192,13 +187,13 @@ namespace nesbrasa::gui
     // Função chamada quando é necessário renderizar o quadro.
     bool JanelaPrincipal::ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr)
     {
-        if (!this->nes->is_programa_carregado)
+        if (!this->nes->programa_carregado())
         {
             return false;
         }
 
         auto pixels = this->textura_tela->get_pixels();
-        auto textura = this->nes->ppu.get_textura();
+        const auto& textura = this->nes->get_textura();
         for (uint i = 0; i < textura.size(); i++) {
             uint32 valor = textura.at(i);
             pixels[i*3 + 0] = (valor & 0xFF0000) >> 4*4;
@@ -259,35 +254,35 @@ namespace nesbrasa::gui
         switch (evento->keyval)
         {
             case GDK_KEY_z:
-                this->nes->controle_1.set_valor(Botao::A, true);
+                this->nes->set_botao(Botao::A, true);
                 break;
 
             case GDK_KEY_x:
-                this->nes->controle_1.set_valor(Botao::B, true);
+                this->nes->set_botao(Botao::B, true);
                 break;
 
             case GDK_KEY_BackSpace:
-                this->nes->controle_1.set_valor(Botao::SELECT, true);
+                this->nes->set_botao(Botao::SELECT, true);
                 break;
 
             case GDK_KEY_Return:
-                this->nes->controle_1.set_valor(Botao::START, true);
+                this->nes->set_botao(Botao::START, true);
                 break;
 
             case GDK_KEY_Up:
-                this->nes->controle_1.set_valor(Botao::CIMA, true);
+                this->nes->set_botao(Botao::CIMA, true);
                 break;
             
             case GDK_KEY_Down:
-                this->nes->controle_1.set_valor(Botao::BAIXO, true);
+                this->nes->set_botao(Botao::BAIXO, true);
                 break;
             
             case GDK_KEY_Left:
-                this->nes->controle_1.set_valor(Botao::ESQUERDA, true);
+                this->nes->set_botao(Botao::ESQUERDA, true);
                 break;
 
             case GDK_KEY_Right:
-                this->nes->controle_1.set_valor(Botao::DIREITA, true);
+                this->nes->set_botao(Botao::DIREITA, true);
                 break;
             
             default: break;
@@ -301,35 +296,35 @@ namespace nesbrasa::gui
         switch (evento->keyval)
         {
             case GDK_KEY_z:
-                this->nes->controle_1.set_valor(Botao::A, false);
+                this->nes->set_botao(Botao::A, false);
                 break;
 
             case GDK_KEY_x:
-                this->nes->controle_1.set_valor(Botao::B, false);
+                this->nes->set_botao(Botao::B, false);
                 break;
 
             case GDK_KEY_BackSpace:
-                this->nes->controle_1.set_valor(Botao::SELECT, false);
+                this->nes->set_botao(Botao::SELECT, false);
                 break;
 
             case GDK_KEY_Return:
-                this->nes->controle_1.set_valor(Botao::START, false);
+                this->nes->set_botao(Botao::START, false);
                 break;
 
             case GDK_KEY_Up:
-                this->nes->controle_1.set_valor(Botao::CIMA, false);
+                this->nes->set_botao(Botao::CIMA, false);
                 break;
             
             case GDK_KEY_Down:
-                this->nes->controle_1.set_valor(Botao::BAIXO, false);
+                this->nes->set_botao(Botao::BAIXO, false);
                 break;
             
             case GDK_KEY_Left:
-                this->nes->controle_1.set_valor(Botao::ESQUERDA, false);
+                this->nes->set_botao(Botao::ESQUERDA, false);
                 break;
 
             case GDK_KEY_Right:
-                this->nes->controle_1.set_valor(Botao::DIREITA, false);
+                this->nes->set_botao(Botao::DIREITA, false);
                 break;
             
             default: break;

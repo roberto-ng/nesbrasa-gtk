@@ -127,6 +127,7 @@ namespace nesbrasa::nucleo
         void escrever_paleta(uint16 endereco, byte valor);
 
         array<uint32, (256*240)>& get_textura();
+        const array<uint32, (256*240)>& get_textura() const;
 
     private:
         byte buscar_pixel_fundo();
