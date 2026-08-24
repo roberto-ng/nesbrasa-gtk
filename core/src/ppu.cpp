@@ -25,8 +25,10 @@ namespace nesbrasa::nucleo
         array<uint16, 4> {0, 1, 2, 3},
     };
 
-    Ppu::Ppu(Memoria* memoria): 
-        memoria(memoria)
+    Ppu::Ppu(Memoria* memoria):
+        memoria(memoria),
+        frente(std::make_unique<Framebuffer>()),
+        fundo(std::make_unique<Framebuffer>())
     {
         this->ciclo = 0;
         this->scanline = 261;
@@ -573,13 +575,12 @@ namespace nesbrasa::nucleo
         }
         
         auto cor_nes = this->ler_paleta(static_cast<uint16>(cor));
-        this->fundo.at(pos_y*256 + pos_x) = cores::tabela_rgb.at(cor_nes%64);
+        this->fundo->at(pos_y*256 + pos_x) = cores::tabela_rgb.at(cor_nes%64);
     }
 
     void Ppu::executar_ciclo_vblank()
     {
-        // Swap the framebuffers in place. Copying either 256x240 buffer to a
-        // local temporary overflows the small WebAssembly stack.
+        // Swap the heap-owned fixed-size framebuffers without copying them.
         this->frente.swap(this->fundo);
 
         this->nmi_ocorreu = true;
@@ -915,11 +916,11 @@ namespace nesbrasa::nucleo
 
     array<uint32, (256*240)>& Ppu::get_textura()
     {
-        return this->frente;
+        return *this->frente;
     }
 
     const array<uint32, (256*240)>& Ppu::get_textura() const
     {
-        return this->frente;
+        return *this->frente;
     }
 }
