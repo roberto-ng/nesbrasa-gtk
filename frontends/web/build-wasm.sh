@@ -30,6 +30,6 @@ em++ \
   -s EXPORT_ES6=1 \
   -s ENVIRONMENT=web \
   -s ALLOW_MEMORY_GROWTH=1 \
-  -s EXPORTED_FUNCTIONS="['_malloc','_free','_nes_create','_nes_destroy','_nes_load_rom','_nes_avancar_quadro','_nes_framebuffer','_nes_programa_carregado','_nes_set_botao']" \
-  -s EXPORTED_RUNTIME_METHODS="['HEAPU8','HEAPU32']" \
+  --bind \
+  -s EXPORTED_RUNTIME_METHODS="['HEAPU32']" \
   -o public/nesbrasa.js
