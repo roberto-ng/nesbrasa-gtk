@@ -578,9 +578,9 @@ namespace nesbrasa::nucleo
 
     void Ppu::executar_ciclo_vblank()
     {
-        auto aux = this->frente;
-        this->frente = this->fundo;
-        this->fundo = aux;
+        // Swap the framebuffers in place. Copying either 256x240 buffer to a
+        // local temporary overflows the small WebAssembly stack.
+        this->frente.swap(this->fundo);
 
         this->nmi_ocorreu = true;
         this->alterar_nmi();

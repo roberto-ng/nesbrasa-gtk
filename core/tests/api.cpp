@@ -26,6 +26,7 @@ int main()
 
     nes.carregar_rom(std::move(rom));
     nes.set_botao(Botao::A, true);
+    nes.avancar_quadro();
 
     return nes.programa_carregado() ? EXIT_SUCCESS : EXIT_FAILURE;
 }

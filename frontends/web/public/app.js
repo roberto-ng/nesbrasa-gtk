@@ -1,4 +1,4 @@
-import createNesbrasaModule from './nesbrasa.js';
+import createNesbrasaModule from './nesbrasa.js?v=3';
 
 const WIDTH = 256;
 const HEIGHT = 240;
@@ -27,7 +27,22 @@ function draw() {
 }
 
 const module = await createNesbrasaModule();
-const emulator = new module.WebNes();
+const handle = module._nes_create();
+emulator = {
+  carregar_rom(bytes) {
+    const pointer = module._malloc(bytes.length);
+    module.HEAPU8.set(bytes, pointer);
+    try {
+      module._nes_load_rom(handle, pointer, bytes.length);
+    } finally {
+      module._free(pointer);
+    }
+  },
+  avancar_quadro() { module._nes_avancar_quadro(handle); },
+  framebuffer_ptr() { return module._nes_framebuffer(handle); },
+  programa_carregado() { return module._nes_programa_carregado(handle); },
+  set_botao(button, pressed) { module._nes_set_botao(handle, button, pressed); },
+};
 
 document.querySelector('#rom').addEventListener('change', async (event) => {
   const file = event.target.files[0];
