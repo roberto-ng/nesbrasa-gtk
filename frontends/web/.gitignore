@@ -1,0 +1,5 @@
+.emscripten-cache/
+node_modules/
+dist/
+public/nesbrasa.js
+public/nesbrasa.wasm

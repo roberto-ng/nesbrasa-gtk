@@ -14,17 +14,15 @@ nesbrasa_sources = [
 ]
 
 nesbrasa_headers = [
-  'cores.hpp',
-  'controle.hpp',
-  'cpu.hpp',
-  'instrucao.hpp',
-  'memoria.hpp',
-  'nesbrasa.hpp',
-  'ppu.hpp',
-  'util.hpp',
-  'tipos_numeros.hpp',
-  'mapeadores/cartucho.hpp',
-  'mapeadores/nrom.hpp',
+  '../include/nesbrasa/cores.hpp',
+  '../include/nesbrasa/controle.hpp',
+  '../include/nesbrasa/cpu.hpp',
+  '../include/nesbrasa/instrucao.hpp',
+  '../include/nesbrasa/memoria.hpp',
+  '../include/nesbrasa/nesbrasa.hpp',
+  '../include/nesbrasa/ppu.hpp',
+  '../include/nesbrasa/util.hpp',
+  '../include/nesbrasa/tipos_numeros.hpp',
 ]
 
 
@@ -33,15 +31,17 @@ nesbrasa_deps = [
 ]
 
 install_headers(nesbrasa_headers, subdir: 'nesbrasa')
+install_headers('mapeadores/cartucho.hpp', 'mapeadores/nrom.hpp',
+                subdir: 'nesbrasa/mapeadores')
 
 nesbrasa_lib = shared_library('nesbrasa' + api_version,
   nesbrasa_sources,
-  include_directories: [inc, inc_mapeadores],
+  include_directories: [inc, inc_src, inc_mapeadores],
   dependencies: nesbrasa_deps,
   install: true,
 )
 
-nesbrasa_dep = declare_dependency(include_directories: [inc, inc_mapeadores], link_with: nesbrasa_lib)
+nesbrasa_dep = declare_dependency(include_directories: [inc, inc_src, inc_mapeadores], link_with: nesbrasa_lib)
 
 pkg = import('pkgconfig')
 

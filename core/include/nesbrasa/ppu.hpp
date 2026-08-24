@@ -38,6 +38,8 @@ namespace nesbrasa::nucleo
     class Ppu
     {
     private:
+        using Framebuffer = array<uint32, (256 * 240)>;
+
         Memoria* memoria;
 
         int ciclo;
@@ -48,8 +50,10 @@ namespace nesbrasa::nucleo
         array<byte, 0x800> tabelas_de_nomes;
         array<byte, 0x100> oam;
         // texturas RGB representando a tela do NES
-        array<uint32, (256*240)> frente;
-        array<uint32, (256*240)> fundo;
+        // Keep the fixed-size buffers on the heap so a Ppu/Nes value does not
+        // consume hundreds of kilobytes of stack space in WebAssembly.
+        std::unique_ptr<Framebuffer> frente;
+        std::unique_ptr<Framebuffer> fundo;
 
         // registradores internos
         uint16 v;
@@ -127,6 +131,7 @@ namespace nesbrasa::nucleo
         void escrever_paleta(uint16 endereco, byte valor);
 
         array<uint32, (256*240)>& get_textura();
+        const array<uint32, (256*240)>& get_textura() const;
 
     private:
         byte buscar_pixel_fundo();

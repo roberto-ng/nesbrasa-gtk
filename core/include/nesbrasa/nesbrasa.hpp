@@ -39,6 +39,10 @@ namespace nesbrasa::nucleo
     class Nes
     {
     public:
+        static constexpr int TELA_LARGURA = 256;
+        static constexpr int TELA_ALTURA = 240;
+        static constexpr int CICLOS_POR_QUADRO = 29780;
+
         Memoria memoria;
         
         Cpu cpu;
@@ -55,5 +59,9 @@ namespace nesbrasa::nucleo
 
         void carregar_rom(vector<byte> arquivo);
         int avancar();
+        int avancar_quadro();
+        const array<uint32, (256 * 240)>& get_textura() const;
+        void set_botao(Botao botao, bool pressionado);
+        bool programa_carregado() const;
     };
 }
