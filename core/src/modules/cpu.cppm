@@ -11,6 +11,12 @@ import nesbrasa.types;
 import nesbrasa.ports;
 import nesbrasa.instruction;
 
+using namespace nesbrasa::tipos;
+using std::optional;
+using std::string;
+using std::stringstream;
+using std::runtime_error;
+
 export namespace nesbrasa::nucleo
 {
     class Cpu : public CpuInterface
@@ -20,40 +26,7 @@ export namespace nesbrasa::nucleo
         std::array<std::optional<Instrucao>, 256> instrucoes;
 
     public:
-        Cpu(CpuBus* memoria);
-        tipos::uint avancar();
-        void resetar();
-        void branch_somar_ciclos(tipos::uint16 endereco);
-        tipos::byte get_estado();
-        void set_estado(tipos::byte valor);
-        void stack_empurrar(tipos::byte valor);
-        void stack_empurrar_16_bits(tipos::uint16 valor);
-        tipos::byte stack_puxar();
-        tipos::uint16 stack_puxar_16_bits();
-        void esperar_adicionar(tipos::uint16 esperar);
-        std::string instrucao_para_asm(tipos::byte opcode);
-        void set_z(tipos::byte valor);
-        void set_n(tipos::byte valor);
-        tipos::uint32 get_ciclos();
-        tipos::uint16 get_esperar();
-        std::optional<Instrucao> get_instrucao(tipos::byte opcode);
-
-    private:
-        void executar(Instrucao* instrucao);
-    };
-}
-
-
-using namespace nesbrasa::tipos;
-using std::optional;
-using std::string;
-
-namespace nesbrasa::nucleo
-{
-    using std::stringstream;
-    using std::runtime_error;
-
-    Cpu::Cpu(CpuBus* memoria):
+        Cpu(CpuBus* memoria):
         instrucoes(carregar_instrucoes())
     {
         this->memoria = memoria;
@@ -75,7 +48,7 @@ namespace nesbrasa::nucleo
         this->interrupcao = Interrupcao::NENHUMA;
     }
 
-    uint Cpu::avancar()
+    uint avancar()
     {
         if (this->esperar > 0)
         {
@@ -131,7 +104,8 @@ namespace nesbrasa::nucleo
         return this->ciclos - ciclos;
     }
 
-    void Cpu::executar(Instrucao* instrucao)
+    private:
+    void executar(Instrucao* instrucao)
     {
         auto endereco = instrucao->buscar_endereco(this);
         
@@ -139,14 +113,15 @@ namespace nesbrasa::nucleo
         instrucao->implementacao(this, instrucao->modo, endereco);
     }
 
-    void Cpu::resetar()
+    public:
+    void resetar()
     {
         this->pc = this->memoria->ler_16_bits(0xFFFC);
         this->sp = 0xFD;
         this->set_estado(0x24);
     }
 
-    void Cpu::branch_somar_ciclos(uint16 endereco)
+    void branch_somar_ciclos(uint16 endereco)
     {
         // somar 1 se os 2 endereços forem da mesma pagina,
         // somar 2 se forem de paginas diferentes
@@ -156,7 +131,7 @@ namespace nesbrasa::nucleo
             this->ciclos += 2;
     }
 
-    byte Cpu::get_estado()
+    byte get_estado()
     {
         byte flags = 0;
 
@@ -173,7 +148,7 @@ namespace nesbrasa::nucleo
         return flags | c | z | i | d | b | bit_5 | v | n;
     }
 
-    void Cpu::set_estado(byte valor)
+    void set_estado(byte valor)
     {
         this->c = buscar_bit(valor, 0);
         this->z = buscar_bit(valor, 1);
@@ -184,7 +159,7 @@ namespace nesbrasa::nucleo
         this->n = buscar_bit(valor, 7);
     }
 
-    void Cpu::stack_empurrar(byte valor)
+    void stack_empurrar(byte valor)
     {
         uint16 endereco = 0x0100 | this->sp;
         this->memoria->escrever(endereco, valor);
@@ -192,7 +167,7 @@ namespace nesbrasa::nucleo
         this->sp -= 1;
     }
 
-    void Cpu::stack_empurrar_16_bits(uint16 valor)
+    void stack_empurrar_16_bits(uint16 valor)
     {
         byte menor = valor & 0x00FF;
         byte maior = (valor & 0xFF00) >> 8;
@@ -201,14 +176,14 @@ namespace nesbrasa::nucleo
         this->stack_empurrar(menor);
     }
 
-    byte Cpu::stack_puxar()
+    byte stack_puxar()
     {
         this->sp += 1;
         uint16 endereco = 0x0100 | this->sp;
         return this->memoria->ler(endereco);
     }
 
-    uint16 Cpu::stack_puxar_16_bits()
+    uint16 stack_puxar_16_bits()
     {
         byte menor = this->stack_puxar();
         byte maior = this->stack_puxar();
@@ -216,12 +191,12 @@ namespace nesbrasa::nucleo
         return (maior << 8) | menor;
     }
 
-    void Cpu::esperar_adicionar(uint16 esperar)
+    void esperar_adicionar(uint16 esperar)
     {
         this->esperar += esperar;
     }
 
-    void Cpu::set_z(byte valor)
+    void set_z(byte valor)
     {
         // checa se um valor é '0'
         if (valor == 0)
@@ -230,7 +205,7 @@ namespace nesbrasa::nucleo
             this->z = false;
     }
 
-    void Cpu::set_n(byte valor)
+    void set_n(byte valor)
     {
         // o valor é negativo se o bit mais significativo não for '0'
         if ((valor & 0b10000000) != 0)
@@ -239,22 +214,22 @@ namespace nesbrasa::nucleo
             this->n = false;
     }
     
-    uint32 Cpu::get_ciclos()
+    uint32 get_ciclos()
     {
         return this->ciclos;
     }
 
-    uint16 Cpu::get_esperar()
+    uint16 get_esperar()
     {
         return this->esperar;
     }
 
-    optional<Instrucao> Cpu::get_instrucao(byte opcode)
+    optional<Instrucao> get_instrucao(byte opcode)
     {
         return this->instrucoes.at(opcode);
     }
 
-    string Cpu::instrucao_para_asm(byte opcode)
+    string instrucao_para_asm(byte opcode)
     {
         // lançar erro se a instrução não existir na tabela
         if (!this->instrucoes.at(opcode).has_value())
@@ -399,4 +374,5 @@ namespace nesbrasa::nucleo
                 return "???";
         }
     }
+    };
 }
