@@ -16,12 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
+module;
+
 #include <limits.h>
-#include <gtkmm.h>
-#include <glib.h>
 
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
@@ -31,8 +28,7 @@
 #include <windows.h>
 #endif
 
-#include "arquivo.hpp"
-#include "janela_principal.hpp"
+module nesbrasa.gtk;
 
 namespace nesbrasa::gui
 {
@@ -42,6 +38,7 @@ namespace nesbrasa::gui
     using std::exception;
     using std::ifstream;
     using std::ofstream;
+    using namespace std::string_literals;
     using nucleo::Botao;
     using namespace std::string_literals;
 

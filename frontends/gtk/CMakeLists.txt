@@ -20,8 +20,16 @@ add_custom_command(
 add_executable(nesbrasa-gtk
     src/arquivo.cpp
     src/main.cpp
+    src/aplicacao.cpp
     src/janela_principal.cpp
     ${GRESOURCE_C}
+)
+
+target_sources(nesbrasa-gtk
+    PRIVATE
+        FILE_SET cxx_modules TYPE CXX_MODULES
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
+        FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/nesbrasa.gtk.cppm
 )
 
 target_link_libraries(nesbrasa-gtk PRIVATE nesbrasa PkgConfig::GTKMM)
