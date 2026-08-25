@@ -1,0 +1,32 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "web-emscripten",
+      "displayName": "Web (Emscripten)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/web-emscripten",
+      "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+      "environment": {
+        "EM_CACHE": "${sourceDir}/frontends/web/.emscripten-cache"
+      },
+      "cacheVariables": {
+        "BUILD_TESTING": "OFF",
+        "BUILD_WEB": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "web-emscripten",
+      "configurePreset": "web-emscripten",
+      "targets": ["nesbrasa-web"]
+    }
+  ]
+}

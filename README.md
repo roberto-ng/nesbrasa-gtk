@@ -7,19 +7,24 @@ emulador.
 
 ### Dependências:
 * Compilador para C++17
-* Meson Build System
+* CMake >= 3.28
 * Ninja
 * Gtkmm >= 3.24.1
 
 ### Instruções para compilação:
 
 ```
-meson _build
-cd _build
-ninja
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
 ```
 
-O executável GTK será criado em `_build/frontends/gtk/nesbrasa-gtk`.
+O executável GTK será criado em `build/frontends/gtk/nesbrasa-gtk`.
+
+Para executar os testes:
+
+```
+ctest --test-dir build --output-on-failure
+```
 
 ### Web
 

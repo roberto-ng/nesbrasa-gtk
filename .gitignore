@@ -1,5 +1,9 @@
 /_build
 /_build_mingw
+/build
+frontends/web/public/nesbrasa.js
+frontends/web/public/nesbrasa.wasm
+frontends/web/.emscripten-cache
 /.flatpak-builder
 /.vscode/ipch
 *.ui~
