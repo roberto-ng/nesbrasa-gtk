@@ -2,7 +2,7 @@
   "name": "nesbrasa-web",
   "private": true,
   "scripts": {
-    "build:wasm": "cd ../.. && cmake --preset web-emscripten && cmake --build --preset web-emscripten",
+    "build:wasm": "./build-wasm.sh",
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview --host 0.0.0.0"
