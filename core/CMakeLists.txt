@@ -1,14 +1,4 @@
 add_library(nesbrasa SHARED
-    src/cores.cpp
-    src/controle.cpp
-    src/cpu.cpp
-    src/instrucao.cpp
-    src/memoria.cpp
-    src/nesbrasa.cpp
-    src/ppu.cpp
-    src/util.cpp
-    src/mapeadores/cartucho.cpp
-    src/mapeadores/nrom.cpp
 )
 
 set(NESBRASA_MODULES
