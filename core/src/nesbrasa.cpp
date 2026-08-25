@@ -21,7 +21,13 @@ module;
 #include <sstream>
 #include <iostream>
 #include <memory>
-module nesbrasa.core;
+module nesbrasa.nes;
+import nesbrasa.types;
+import nesbrasa.util;
+import nesbrasa.cartridge;
+import nesbrasa.mapper.nrom;
+
+using namespace nesbrasa::tipos;
 
 namespace nesbrasa::nucleo
 {

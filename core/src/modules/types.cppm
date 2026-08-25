@@ -1,6 +1,8 @@
+module;
 #include <cstdint>
+export module nesbrasa.types;
 
-namespace nesbrasa::tipos
+export namespace nesbrasa::tipos
 {
     using byte = uint8_t;
     using uint16 = uint16_t;
@@ -11,4 +13,9 @@ namespace nesbrasa::tipos
     using int32 = int32_t;
     using int64 = int64_t;
     using uint = unsigned int;
+}
+
+export namespace nesbrasa::nucleo
+{
+    enum class Interrupcao { NMI, IRQ, NENHUMA };
 }

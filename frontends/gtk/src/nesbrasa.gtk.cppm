@@ -12,7 +12,7 @@ module;
 #include <gtkmm.h>
 
 export module nesbrasa.gtk;
-export import nesbrasa.core;
+export import nesbrasa;
 
 export namespace nesbrasa::gui
 {

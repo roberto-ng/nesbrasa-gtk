@@ -11,24 +11,31 @@ add_library(nesbrasa SHARED
     src/mapeadores/nrom.cpp
 )
 
+set(NESBRASA_MODULES
+    src/modules/types.cppm
+    src/modules/memory.cppm
+    src/modules/instruction.cppm
+    src/modules/cpu.cppm
+    src/modules/ppu.cppm
+    src/modules/controller.cppm
+    src/modules/cartridge.cppm
+    src/modules/mapper.nrom.cppm
+    src/modules/cores.cppm
+    src/modules/util.cppm
+    src/modules/nes.cppm
+    src/modules/nesbrasa.cppm
+)
+
 target_sources(nesbrasa
     PUBLIC
         FILE_SET cxx_modules TYPE CXX_MODULES
-        FILES src/nesbrasa.core.cppm
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src/modules
+        FILES ${NESBRASA_MODULES}
 )
 
 set_target_properties(nesbrasa PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 0
-)
-
-target_include_directories(nesbrasa
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/nesbrasa>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/nesbrasa>
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/mapeadores
 )
 
 install(TARGETS nesbrasa
@@ -37,12 +44,6 @@ install(TARGETS nesbrasa
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     FILE_SET cxx_modules DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx/nesbrasa
-)
-
-install(DIRECTORY include/nesbrasa/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nesbrasa)
-install(DIRECTORY src/mapeadores/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nesbrasa/mapeadores
-    FILES_MATCHING PATTERN "*.hpp"
 )
 
 if(BUILD_TESTING)

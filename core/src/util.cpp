@@ -18,7 +18,10 @@
 
 module;
 #include <cstdint>
-module nesbrasa.core;
+module nesbrasa.util;
+import nesbrasa.types;
+
+using namespace nesbrasa::tipos;
 
 namespace nesbrasa::nucleo
 {

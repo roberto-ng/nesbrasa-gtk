@@ -19,7 +19,13 @@
 module;
 #include <sstream>
 #include <iostream>
-module nesbrasa.core;
+module nesbrasa.memory;
+import nesbrasa.nes;
+import nesbrasa.ppu;
+import nesbrasa.controller;
+import nesbrasa.cartridge;
+
+using namespace nesbrasa::tipos;
 
 namespace nesbrasa::nucleo
 {

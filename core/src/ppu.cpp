@@ -8,7 +8,14 @@
 module;
 #include <iostream>
 #include <memory>
-module nesbrasa.core;
+module nesbrasa.ppu;
+import nesbrasa.types;
+import nesbrasa.memory;
+import nesbrasa.nes;
+import nesbrasa.cartridge;
+import nesbrasa.cores;
+
+using namespace nesbrasa::tipos;
 
 namespace nesbrasa::nucleo
 {

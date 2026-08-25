@@ -17,7 +17,10 @@
  */
 
 module;
-module nesbrasa.core;
+module nesbrasa.controller;
+import nesbrasa.types;
+
+using namespace nesbrasa::tipos;
 
 namespace nesbrasa::nucleo
 {

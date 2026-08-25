@@ -1,5 +1,10 @@
 module;
-module nesbrasa.core;
+#include <array>
+module nesbrasa.cores;
+import nesbrasa.types;
+
+using namespace nesbrasa::tipos;
+using std::array;
 
 namespace nesbrasa::nucleo::cores
 {

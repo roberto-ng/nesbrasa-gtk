@@ -20,7 +20,16 @@ module;
 #include <stdexcept>
 #include <sstream>
 #include <memory>
-module nesbrasa.core;
+#include <vector>
+#include <string>
+module nesbrasa.cartridge;
+import nesbrasa.types;
+import nesbrasa.util;
+import nesbrasa.mapper.nrom;
+
+using namespace nesbrasa::tipos;
+using std::unique_ptr;
+using std::vector;
 
 namespace nesbrasa::nucleo::mapeadores
 {

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-import nesbrasa.core;
+import nesbrasa;
 
 namespace
 {

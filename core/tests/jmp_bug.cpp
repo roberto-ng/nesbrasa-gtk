@@ -1,6 +1,6 @@
 #include <memory>
 
-import nesbrasa.core;
+import nesbrasa;
 
 using nesbrasa::nucleo::Nes;
 using std::unique_ptr;

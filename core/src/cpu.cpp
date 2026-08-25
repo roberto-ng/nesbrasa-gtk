@@ -21,7 +21,17 @@ module;
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
-module nesbrasa.core;
+#include <optional>
+#include <string>
+module nesbrasa.cpu;
+import nesbrasa.types;
+import nesbrasa.instruction;
+import nesbrasa.memory;
+import nesbrasa.util;
+
+using namespace nesbrasa::tipos;
+using std::optional;
+using std::string;
 
 namespace nesbrasa::nucleo
 {

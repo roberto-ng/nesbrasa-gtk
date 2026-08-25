@@ -21,7 +21,14 @@ module;
 #include <stdexcept>
 #include <cstdint>
 #include <string>
-module nesbrasa.core;
+#include <vector>
+module nesbrasa.mapper.nrom;
+import nesbrasa.types;
+import nesbrasa.cartridge;
+
+using namespace nesbrasa::tipos;
+using std::vector;
+using std::string;
 
 namespace nesbrasa::nucleo::mapeadores
 {
