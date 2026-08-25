@@ -267,11 +267,32 @@ namespace nesbrasa::gui
         Gtk::Dialog dialogo("Configurações", *this, true);
         dialogo.add_button("Cancelar", Gtk::ResponseType::RESPONSE_CANCEL);
         dialogo.add_button("Aplicar", Gtk::ResponseType::RESPONSE_OK);
+        auto* acoes = dialogo.get_action_area();
+        acoes->set_layout(Gtk::BUTTONBOX_EXPAND);
+        acoes->set_homogeneous(true);
+        acoes->set_spacing(10);
+        dialogo.set_default_response(Gtk::ResponseType::RESPONSE_OK);
+        dialogo.set_resizable(false);
 
         auto& conteudo = *dialogo.get_content_area();
+        conteudo.set_border_width(20);
+        conteudo.set_spacing(14);
+
+        auto* titulo = Gtk::manage(new Gtk::Label());
+        titulo->set_markup("<b>Controles do emulador</b>");
+        titulo->set_halign(Gtk::ALIGN_START);
+        conteudo.pack_start(*titulo, Gtk::PACK_SHRINK);
+
+        auto* ajuda = Gtk::manage(new Gtk::Label(
+            "Selecione um controle e pressione a tecla desejada."));
+        ajuda->set_halign(Gtk::ALIGN_START);
+        ajuda->set_line_wrap(true);
+        conteudo.pack_start(*ajuda, Gtk::PACK_SHRINK);
+
         Gtk::Grid grade;
-        grade.set_row_spacing(8);
-        grade.set_column_spacing(16);
+        grade.set_row_spacing(10);
+        grade.set_column_spacing(24);
+        grade.set_halign(Gtk::ALIGN_CENTER);
         conteudo.pack_start(grade, Gtk::PACK_SHRINK);
 
         array<Gtk::Button*, 8> botoes = {};
@@ -288,6 +309,10 @@ namespace nesbrasa::gui
             auto* nome = Gtk::manage(new Gtk::Label(NOMES_BOTOES[i]));
             auto* botao = Gtk::manage(new Gtk::Button());
             botoes[i] = botao;
+            nome->set_halign(Gtk::ALIGN_END);
+            nome->set_size_request(140, -1);
+            botao->set_size_request(180, 42);
+            botao->set_hexpand(false);
             botao->set_can_focus(true);
             botao->add_events(Gdk::KEY_PRESS_MASK);
             botao->signal_key_press_event().connect([&, i](GdkEventKey* evento) {
@@ -300,11 +325,12 @@ namespace nesbrasa::gui
         }
 
         auto* restaurar = Gtk::manage(new Gtk::Button("Restaurar padrões"));
+        restaurar->set_size_request(180, 38);
         restaurar->signal_clicked().connect([&, this]() {
             this->teclas = TECLAS_PADRAO;
             atualizar_rotulos();
         });
-        grade.attach(*restaurar, 0, NOMES_BOTOES.size(), 2, 1);
+        grade.attach(*restaurar, 1, NOMES_BOTOES.size(), 1, 1);
         atualizar_rotulos();
         dialogo.show_all();
 
