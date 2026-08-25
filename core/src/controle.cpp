@@ -16,7 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "controle.hpp"
+module;
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo
 {

@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <vector>
 
-#include "nesbrasa.hpp"
+import nesbrasa.core;
 
 using nesbrasa::nucleo::Botao;
 using nesbrasa::nucleo::Nes;

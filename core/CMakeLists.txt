@@ -11,6 +11,12 @@ add_library(nesbrasa SHARED
     src/mapeadores/nrom.cpp
 )
 
+target_sources(nesbrasa
+    PUBLIC
+        FILE_SET cxx_modules TYPE CXX_MODULES
+        FILES src/nesbrasa.core.cppm
+)
+
 set_target_properties(nesbrasa PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 0
@@ -30,6 +36,7 @@ install(TARGETS nesbrasa
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    FILE_SET cxx_modules DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx/nesbrasa
 )
 
 install(DIRECTORY include/nesbrasa/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nesbrasa)

@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+module;
 #include <stdexcept>
 #include <sstream>
-
-#include "cartucho.hpp"
-#include "nrom.hpp"
-#include "util.hpp"
+#include <memory>
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo::mapeadores
 {

@@ -16,13 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+module;
 #include <string>
 #include <sstream>
 #include <iostream>
-
-#include "nesbrasa.hpp"
-#include "mapeadores/nrom.hpp"
-#include "util.hpp"
+#include <memory>
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo
 {

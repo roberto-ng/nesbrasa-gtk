@@ -1,4 +1,5 @@
-#include "cores.hpp"
+module;
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo::cores
 {

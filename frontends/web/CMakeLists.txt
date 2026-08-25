@@ -16,6 +16,13 @@ add_executable(nesbrasa-web
     wasm/nesbrasa_web.cpp
 )
 
+target_sources(nesbrasa-web
+    PUBLIC
+        FILE_SET cxx_modules TYPE CXX_MODULES
+        BASE_DIRS ${CMAKE_SOURCE_DIR}/core/src
+        FILES ${CMAKE_SOURCE_DIR}/core/src/nesbrasa.core.cppm
+)
+
 set_target_properties(nesbrasa-web PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/public
     OUTPUT_NAME nesbrasa

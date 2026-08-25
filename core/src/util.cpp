@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "util.hpp"
+module;
+#include <cstdint>
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo
 {

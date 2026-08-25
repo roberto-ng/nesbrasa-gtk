@@ -16,9 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
+module;
 
-#include "nrom.hpp"
+#include <stdexcept>
+#include <cstdint>
+#include <string>
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo::mapeadores
 {

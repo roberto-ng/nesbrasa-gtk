@@ -25,7 +25,7 @@
 #include <filesystem>
 #include <gtkmm.h>
 
-#include <nesbrasa.hpp>
+import nesbrasa.core;
 
 namespace nesbrasa::gui
 {

@@ -5,12 +5,10 @@
    O código presente neste arquivo é baseado em https://github.com/fogleman/nes/blob/master/nes/ppu.go
 */
 
-#include "ppu.hpp"
-#include "nesbrasa.hpp"
-#include "memoria.hpp"
-#include "util.hpp"
-#include "cores.hpp"
+module;
 #include <iostream>
+#include <memory>
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo
 {

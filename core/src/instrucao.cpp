@@ -16,15 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+module;
+
 #include <memory>
 #include <iostream>
 #include <bitset>
-
-#include "nesbrasa.hpp"
-#include "cpu.hpp"
-#include "instrucao.hpp"
-#include "memoria.hpp"
-#include "util.hpp"
+module nesbrasa.core;
 
 namespace nesbrasa::nucleo
 {
