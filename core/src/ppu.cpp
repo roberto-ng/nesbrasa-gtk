@@ -8,6 +8,7 @@
 module;
 #include <iostream>
 #include <memory>
+#include <array>
 module nesbrasa.ppu;
 import nesbrasa.types;
 import nesbrasa.memory;
@@ -16,6 +17,7 @@ import nesbrasa.cartridge;
 import nesbrasa.cores;
 
 using namespace nesbrasa::tipos;
+using std::array;
 
 namespace nesbrasa::nucleo
 {
@@ -30,8 +32,9 @@ namespace nesbrasa::nucleo
         array<uint16, 4> {0, 1, 2, 3},
     };
 
-    Ppu::Ppu(Memoria* memoria):
+    Ppu::Ppu(CpuBus* memoria, CartridgePort* cartucho, InterruptSink* interrupcoes, CpuInterface* cpu):
         memoria(memoria),
+        cartucho(cartucho), interrupcoes(interrupcoes), cpu(cpu),
         frente(std::make_unique<Framebuffer>()),
         fundo(std::make_unique<Framebuffer>())
     {
@@ -87,6 +90,11 @@ namespace nesbrasa::nucleo
         this->reiniciar();
     }
 
+    void Ppu::configurar_cartucho(CartridgePort* cartucho)
+    {
+        this->cartucho = cartucho;
+    }
+
     void Ppu::reiniciar()
     {
         this->frame = 0;
@@ -105,7 +113,7 @@ namespace nesbrasa::nucleo
             nmi_atrasar -= 1;
             if (nmi_atrasar == 0 && this->nmi_output && this->nmi_ocorreu)
             {
-                this->memoria->cpu_ativar_interrupcao(Interrupcao::NMI);
+                this->interrupcoes->ativar_interrupcao(Interrupcao::NMI);
             }
         }
 
@@ -258,7 +266,7 @@ namespace nesbrasa::nucleo
         }
     }
 
-    void Ppu::registrador_escrever(Nes *nes, uint16 endereco, byte valor)
+    void Ppu::registrador_escrever(uint16 endereco, byte valor)
     {
         this->ultimo_valor = valor;
         switch (endereco)
@@ -284,11 +292,11 @@ namespace nesbrasa::nucleo
                 break;
 
             case 0x2007:
-                this->set_dados(nes, valor);
+                this->set_dados(valor);
                 break;
             
             case 0x4014:
-                this->set_omd_dma(nes, valor);
+                this->set_omd_dma(valor);
                 break;
 
             default:
@@ -296,17 +304,17 @@ namespace nesbrasa::nucleo
         }
     }
 
-    byte Ppu::ler(Nes *nes, uint16 endereco)
+    byte Ppu::ler(uint16 endereco)
     {
         endereco = endereco % 0x4000;
 
         if (endereco < 0x2000)
         {
-            return nes->cartucho->ler(endereco);
+            return this->cartucho->ler(endereco);
         }
         else if (endereco >= 0x2000 && endereco < 0x3F00)
         {
-            byte modo = nes->cartucho->espelhamento;
+            byte modo = this->cartucho->get_espelhamento();
             uint16 endereco_espelhado = this->endereco_espelhado(modo, endereco);
             uint16 posicao = endereco_espelhado % this->tabelas_de_nomes.size();
 
@@ -325,16 +333,16 @@ namespace nesbrasa::nucleo
         return 0;
     }
 
-    void Ppu::escrever(Nes *nes, uint16 endereco, byte valor)
+    void Ppu::escrever(uint16 endereco, byte valor)
     {
         endereco = endereco % 0x4000;
         if (endereco < 0x2000)
         {
-            nes->cartucho->escrever(endereco, valor);
+            this->cartucho->escrever(endereco, valor);
         }
         else if (endereco >= 0x2000 && endereco < 0x3F00)
         {
-            byte modo = nes->cartucho->espelhamento;
+            byte modo = this->cartucho->get_espelhamento();
             uint16 endereco_espelhado = this->endereco_espelhado(modo, endereco);
             uint16 posicao = endereco_espelhado % this->tabelas_de_nomes.size();
             
@@ -409,7 +417,7 @@ namespace nesbrasa::nucleo
         int cor_num = dados & 0x3;
         int paleta_num = (dados >> 2) & 0x3;
 
-        if (cor_num == 0) return this->ler(this->memoria->nes, 0x3F00);
+        if (cor_num == 0) return this->ler(0x3F00);
 
         uint16 paleta_endereco = 0;
         switch (paleta_num)
@@ -434,7 +442,7 @@ namespace nesbrasa::nucleo
         }
 
         paleta_endereco += cor_num - 1;
-        return this->ler(this->memoria->nes, paleta_endereco);
+        return this->ler(paleta_endereco);
     }
 
     byte Ppu::buscar_cor_pixel(byte dados)
@@ -442,7 +450,7 @@ namespace nesbrasa::nucleo
         int cor_num = dados & 0x3;
         int paleta_num = (dados >> 2) & 0x3;
 
-        if (cor_num == 0) return this->ler(this->memoria->nes, 0x3F00);
+        if (cor_num == 0) return this->ler(0x3F00);
 
         uint16 paleta_endereco = 0;
         switch (paleta_num)
@@ -467,7 +475,7 @@ namespace nesbrasa::nucleo
         }
 
         paleta_endereco += cor_num - 1;
-        return this->ler(this->memoria->nes, paleta_endereco);
+        return this->ler(paleta_endereco);
     }
 
     uint32 Ppu::buscar_padrao_sprite(int i, int linha)
@@ -504,8 +512,8 @@ namespace nesbrasa::nucleo
         }
 
         byte atrib = (atributos & 3) << 2;
-        byte tile_byte_menor = this->ler(this->memoria->nes, endereco);
-        byte tile_byte_maior = this->ler(this->memoria->nes, endereco+8);
+        byte tile_byte_menor = this->ler(endereco);
+        byte tile_byte_maior = this->ler(endereco+8);
 
         uint32 valor = 0;
         for (int i = 0; i < 8; i++)
@@ -612,7 +620,7 @@ namespace nesbrasa::nucleo
     {
         uint16 v = this->v;
 	    uint16 endereco = 0x2000 | (v & 0x0FFF);
-	    this->tabela_de_nomes_byte = this->ler(this->memoria->nes, endereco);
+	    this->tabela_de_nomes_byte = this->ler(endereco);
     }
 
     void Ppu::buscar_byte_tabela_de_atributos()
@@ -620,7 +628,7 @@ namespace nesbrasa::nucleo
         uint16 v = this->v;
         uint16 endereco = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07);
         uint16 shift = ((v >> 4) & 4) | (v & 2);
-        this->tabela_de_atributos_byte = ((this->ler(this->memoria->nes, endereco) >> shift) & 3) << 2;
+        this->tabela_de_atributos_byte = ((this->ler(endereco) >> shift) & 3) << 2;
     }
 
     void Ppu::buscar_tile_byte_menor()
@@ -629,7 +637,7 @@ namespace nesbrasa::nucleo
         uint16 tabela = this->flag_padrao_fundo ? 1 : 0;
         uint16 tile = this->tabela_de_nomes_byte;
         uint16 endereco = 0x1000*tabela + tile*16 + y;
-        this->tile_byte_menor = this->ler(this->memoria->nes, endereco);
+        this->tile_byte_menor = this->ler(endereco);
     }
 
     void Ppu::buscar_tile_byte_maior()
@@ -638,7 +646,7 @@ namespace nesbrasa::nucleo
         uint16 tabela = this->flag_padrao_fundo ? 1 : 0;
         uint16 tile = this->tabela_de_nomes_byte;
         uint16 endereco = 0x1000*tabela + tile*16 + y;
-        this->tile_byte_maior = this->ler(this->memoria->nes, endereco+8);
+        this->tile_byte_maior = this->ler(endereco+8);
     }
 
     void Ppu::tile_guardar_dados()
@@ -861,7 +869,7 @@ namespace nesbrasa::nucleo
         }
     }
 
-    void Ppu::set_omd_dma(Nes *nes, byte valor)
+    void Ppu::set_omd_dma(byte valor)
     {
         uint16 ponteiro = static_cast<uint16>(valor) << 8;
 
@@ -872,16 +880,16 @@ namespace nesbrasa::nucleo
             ponteiro++;
         }
 
-        nes->cpu.esperar_adicionar(513);
-        if ((nes->cpu.get_ciclos() % 2) == 1)
+        this->cpu->esperar_adicionar(513);
+        if ((this->cpu->get_ciclos() % 2) == 1)
         {
-            nes->cpu.esperar_adicionar(1);
+            this->cpu->esperar_adicionar(1);
         }
     }
 
     byte Ppu::get_dados()
     {
-        byte valor = this->ler(this->memoria->nes, this->v);
+        byte valor = this->ler(this->v);
         if ((this->v%0x4000) < 0x3F00)
         {
             byte buffer_dados = this->buffer_dados;
@@ -890,7 +898,7 @@ namespace nesbrasa::nucleo
         }
         else
         {
-            this->buffer_dados = this->ler(this->memoria->nes, this->v - 0x1000);
+            this->buffer_dados = this->ler(this->v - 0x1000);
         }
 
         if (this->flag_incrementar == 0)
@@ -901,9 +909,9 @@ namespace nesbrasa::nucleo
         return valor;
     }
 
-    void Ppu::set_dados(Nes *nes, byte valor)
+    void Ppu::set_dados(byte valor)
     {
-        this->escrever(nes, this->v, valor);
+        this->escrever(this->v, valor);
         
         if (this->flag_incrementar == false)
             this->v += 1;

@@ -1,2 +1,2 @@
 #pragma once
-import nesbrasa.gtk;
+#include "nesbrasa.gtk.hpp"

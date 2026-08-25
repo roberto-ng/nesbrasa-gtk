@@ -2,28 +2,21 @@ module;
 #include <array>
 #include <optional>
 #include <string>
-namespace nesbrasa::nucleo { class Memoria; }
 export module nesbrasa.cpu;
 import nesbrasa.types;
+import nesbrasa.ports;
 import nesbrasa.instruction;
 
 export namespace nesbrasa::nucleo
 {
-    class Cpu
+    class Cpu : public CpuInterface
     {
         tipos::uint16 esperar;
         tipos::uint32 ciclos;
         std::array<std::optional<Instrucao>, 256> instrucoes;
 
     public:
-        Memoria* memoria;
-        Interrupcao interrupcao;
-        tipos::uint16 pc;
-        tipos::byte sp, a, x, y;
-        bool c, z, i, d, b, v, n;
-        bool is_pag_alterada;
-
-        Cpu(Memoria* memoria);
+        Cpu(CpuBus* memoria);
         tipos::uint avancar();
         void resetar();
         void branch_somar_ciclos(tipos::uint16 endereco);

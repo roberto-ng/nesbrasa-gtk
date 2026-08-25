@@ -1,12 +1,10 @@
-module;
+#include "nesbrasa.gtk.hpp"
 
 #include <stdexcept>
 #include <fstream>
 #include <iterator>
 #include <string>
 #include <vector>
-
-module nesbrasa.gtk;
 
 namespace nesbrasa::gui
 {

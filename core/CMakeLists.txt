@@ -13,6 +13,7 @@ add_library(nesbrasa SHARED
 
 set(NESBRASA_MODULES
     src/modules/types.cppm
+    src/modules/ports.cppm
     src/modules/memory.cppm
     src/modules/instruction.cppm
     src/modules/cpu.cppm

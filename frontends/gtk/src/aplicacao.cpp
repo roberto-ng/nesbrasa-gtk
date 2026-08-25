@@ -1,10 +1,8 @@
-module;
+#include "nesbrasa.gtk.hpp"
 
 #if defined(_WIN32)
 #include <windows.h>
 #endif
-
-module nesbrasa.gtk;
 
 namespace nesbrasa::gui
 {

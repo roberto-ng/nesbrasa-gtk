@@ -26,7 +26,6 @@ module;
 module nesbrasa.cpu;
 import nesbrasa.types;
 import nesbrasa.instruction;
-import nesbrasa.memory;
 import nesbrasa.util;
 
 using namespace nesbrasa::tipos;
@@ -38,10 +37,10 @@ namespace nesbrasa::nucleo
     using std::stringstream;
     using std::runtime_error;
 
-    Cpu::Cpu(Memoria* memoria): 
-        instrucoes(carregar_instrucoes()), 
-        memoria(memoria)            
+    Cpu::Cpu(CpuBus* memoria):
+        instrucoes(carregar_instrucoes())
     {
+        this->memoria = memoria;
         this->ciclos = 0;
         this->pc = 0;
         this->sp = 0;

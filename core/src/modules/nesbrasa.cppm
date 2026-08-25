@@ -1,6 +1,7 @@
 export module nesbrasa;
 
 export import nesbrasa.types;
+export import nesbrasa.ports;
 export import nesbrasa.memory;
 export import nesbrasa.instruction;
 export import nesbrasa.cpu;

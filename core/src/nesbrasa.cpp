@@ -21,6 +21,9 @@ module;
 #include <sstream>
 #include <iostream>
 #include <memory>
+#include <array>
+#include <vector>
+#include <string>
 module nesbrasa.nes;
 import nesbrasa.types;
 import nesbrasa.util;
@@ -34,16 +37,22 @@ namespace nesbrasa::nucleo
     using std::make_unique;
     using std::stringstream;
     using std::runtime_error;
+    using std::array;
+    using std::vector;
+    using std::string;
     using namespace std::string_literals;
     using namespace mapeadores;
 
     Nes::Nes(): 
-        memoria(this),
+        memoria(),
         cpu(&this->memoria),
-        ppu(&this->memoria)
+        ppu(&this->memoria, nullptr, this, &this->cpu)
     {
+        this->memoria.configurar(&this->ppu, &this->controle_1, &this->controle_2, nullptr, this);
         this->is_programa_carregado = false;
         this->cartucho = nullptr;
+        this->memoria.configurar(&this->ppu, &this->controle_1, &this->controle_2, nullptr, this);
+        this->ppu.configurar_cartucho(nullptr);
     }
 
     void Nes::carregar_rom(vector<byte> arquivo)
@@ -100,6 +109,8 @@ namespace nesbrasa::nucleo
         auto cartucho_tipo = static_cast<CartuchoTipo>(mapeador_codigo);
         // Usar o método factory da classe Cartucho para criar o objeto do cartucho
         this->cartucho = Cartucho::criar(cartucho_tipo, prg_qtd, chr_qtd, arquivo, formato, espelhamento);
+        this->memoria.configurar(&this->ppu, &this->controle_1, &this->controle_2, this->cartucho.get(), this);
+        this->ppu.configurar_cartucho(this->cartucho.get());
 
         //TODO: Completar suporte a ROMs no formato NES 2.0
         this->is_programa_carregado = true;
@@ -146,5 +157,10 @@ namespace nesbrasa::nucleo
     bool Nes::programa_carregado() const
     {
         return this->is_programa_carregado;
+    }
+
+    void Nes::ativar_interrupcao(Interrupcao interrupcao)
+    {
+        this->cpu.interrupcao = interrupcao;
     }
 }

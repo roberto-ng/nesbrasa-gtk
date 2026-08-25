@@ -9,10 +9,11 @@ export import nesbrasa.cpu;
 export import nesbrasa.ppu;
 export import nesbrasa.controller;
 export import nesbrasa.cartridge;
+import nesbrasa.ports;
 
 export namespace nesbrasa::nucleo
 {
-    class Nes
+    class Nes : public InterruptSink
     {
     public:
         static constexpr int TELA_LARGURA = 256;
@@ -31,5 +32,6 @@ export namespace nesbrasa::nucleo
         const std::array<tipos::uint32, 256 * 240>& get_textura() const;
         void set_botao(Botao botao, bool pressionado);
         bool programa_carregado() const;
+        void ativar_interrupcao(Interrupcao) override;
     };
 }

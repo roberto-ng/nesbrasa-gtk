@@ -4,13 +4,14 @@ module;
 #include <vector>
 export module nesbrasa.cartridge;
 import nesbrasa.types;
+import nesbrasa.ports;
 
 export namespace nesbrasa::nucleo::mapeadores
 {
     enum class CartuchoTipo { NROM = 0, MMC1 = 1, DESCONHECIDO };
     enum class ArquivoFormato { DESCONHECIDO, INES, NES_2_0 };
 
-    class Cartucho
+    class Cartucho : public CartridgePort
     {
     protected:
         int prg_bancos_quantidade, chr_bancos_quantidade;
@@ -23,10 +24,11 @@ export namespace nesbrasa::nucleo::mapeadores
         static std::unique_ptr<Cartucho> criar(CartuchoTipo, int, int, std::vector<tipos::byte>&, ArquivoFormato, tipos::byte);
         Cartucho(int, int, std::vector<tipos::byte>&, ArquivoFormato, tipos::byte);
         virtual ~Cartucho() = default;
-        virtual tipos::byte ler(tipos::uint16) = 0;
-        virtual void escrever(tipos::uint16, tipos::byte) = 0;
+        tipos::byte ler(tipos::uint16) override = 0;
+        void escrever(tipos::uint16, tipos::byte) override = 0;
         virtual std::string get_nome() = 0;
         int get_prg_bancos_quantidade();
         int get_chr_bancos_quantidade();
+        tipos::byte get_espelhamento() const override { return this->Cartucho::espelhamento; }
     };
 }

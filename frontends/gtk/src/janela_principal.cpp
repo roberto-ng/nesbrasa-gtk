@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module;
+#include "nesbrasa.gtk.hpp"
 
 #include <limits.h>
 
@@ -27,8 +27,7 @@ module;
 #elif defined(_WIN32)
 #include <windows.h>
 #endif
-
-module nesbrasa.gtk;
+#include <fstream>
 
 namespace nesbrasa::gui
 {

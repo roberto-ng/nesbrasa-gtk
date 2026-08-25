@@ -20,7 +20,6 @@ module;
 #include <sstream>
 #include <iostream>
 module nesbrasa.memory;
-import nesbrasa.nes;
 import nesbrasa.ppu;
 import nesbrasa.controller;
 import nesbrasa.cartridge;
@@ -32,10 +31,18 @@ namespace nesbrasa::nucleo
     using std::stringstream;
     using std::runtime_error;
 
-    Memoria::Memoria(Nes *nes):
-        ram({ 0 })
+    Memoria::Memoria():
+        ram({ 0 }), ppu(nullptr), controle_1(nullptr), controle_2(nullptr), cartucho(nullptr), interrupcoes(nullptr)
     {
-        this->nes = nes;
+    }
+
+    void Memoria::configurar(PpuPort* ppu, ControllerPort* controle_1, ControllerPort* controle_2, CartridgePort* cartucho, InterruptSink* interrupcoes)
+    {
+        this->ppu = ppu;
+        this->controle_1 = controle_1;
+        this->controle_2 = controle_2;
+        this->cartucho = cartucho;
+        this->interrupcoes = interrupcoes;
     }
 
     byte Memoria::ler(uint16 endereco)
@@ -52,13 +59,13 @@ namespace nesbrasa::nucleo
         }
         else if (endereco >= 0x2000 && endereco <= 0x2007)
         {
-            return this->nes->ppu.registrador_ler(endereco);
+            return this->ppu->registrador_ler(endereco);
         }
         else if (endereco >= 0x2008 && endereco <= 0x3FFF)
         {
             // endereço espelhado do registrador
             uint16 ender_espelhado = (endereco%0x8) + 0x2000;
-            return this->nes->ppu.registrador_ler(ender_espelhado);
+            return this->ppu->registrador_ler(ender_espelhado);
         }
         else if (endereco >= 0x4000 && endereco <= 0x4015)
         {
@@ -67,11 +74,11 @@ namespace nesbrasa::nucleo
         }
         else if (endereco == 0x4016)
         {
-            return this->nes->controle_1.ler();
+            return this->controle_1->ler();
         }
         else if (endereco == 0x4017)
         {
-            return this->nes->controle_2.ler();
+            return this->controle_2->ler();
         }
         else if (endereco >= 0x4018 && endereco <= 0x401F)
         {
@@ -80,7 +87,7 @@ namespace nesbrasa::nucleo
         }
         else if (endereco >= 0x4020 && endereco <= 0xFFFF)
         {
-            return this->nes->cartucho->ler(endereco);
+            return this->cartucho->ler(endereco);
         }
 
         // endereço não existe, lançar erro
@@ -131,25 +138,25 @@ namespace nesbrasa::nucleo
         }
         else if (endereco >= 0x2000 && endereco <= 0x2007)
         {
-            this->nes->ppu.registrador_escrever(nes, endereco, valor);
+            this->ppu->registrador_escrever(endereco, valor);
         }
         else if (endereco >= 0x2008 && endereco <= 0x3FFF)
         {
             // endereço espelhado do registrador
             uint16 ender_espelhado = (endereco%0x8) + 0x2000;
-            this->nes->ppu.registrador_escrever(nes, ender_espelhado, valor);
+            this->ppu->registrador_escrever(ender_espelhado, valor);
         }
         else if (endereco >= 0x4000 && endereco <= 0x4017)
         {
             // $4014 is the PPU OAM DMA register, not an APU register.
             if (endereco == 0x4014)
             {
-                this->nes->ppu.registrador_escrever(nes, endereco, valor);
+                this->ppu->registrador_escrever(endereco, valor);
             }
             else if (endereco == 0x4016)
             {
-                this->nes->controle_1.escrever(valor);
-                this->nes->controle_2.escrever(valor);
+                this->controle_1->escrever(valor);
+                this->controle_2->escrever(valor);
             }
             else 
             {
@@ -163,7 +170,7 @@ namespace nesbrasa::nucleo
         }
         else if (endereco >= 0x4020 && endereco <= 0xFFFF)
         {
-            this->nes->cartucho->escrever(endereco, valor);
+            this->cartucho->escrever(endereco, valor);
         }
         else
         {
@@ -179,6 +186,6 @@ namespace nesbrasa::nucleo
 
     void Memoria::cpu_ativar_interrupcao(Interrupcao interrupcao)
     {
-        this->nes->cpu.interrupcao = interrupcao;
+        this->interrupcoes->ativar_interrupcao(interrupcao);
     }
 }

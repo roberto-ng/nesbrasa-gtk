@@ -3,14 +3,14 @@ module;
 #include <functional>
 #include <optional>
 #include <string>
-namespace nesbrasa::nucleo { class Cpu; }
 export module nesbrasa.instruction;
 import nesbrasa.types;
+import nesbrasa.ports;
 
 export namespace nesbrasa::nucleo
 {
     class Instrucao;
-    using InstrucaoImplementacao = std::function<void(Instrucao*, Cpu*, std::optional<tipos::uint16>)>;
+    using InstrucaoImplementacao = std::function<void(Instrucao*, CpuInterface*, std::optional<tipos::uint16>)>;
 
     enum class InstrucaoModo { ACM, ABS, ABS_X, ABS_Y, IMED, IMPL, IND, IND_X, IND_Y, REL, P_ZERO, P_ZERO_X, P_ZERO_Y };
 
@@ -27,7 +27,7 @@ export namespace nesbrasa::nucleo
         Instrucao(std::string nome, tipos::byte bytes, tipos::int32 ciclos,
                   tipos::int32 ciclos_pag_alt, InstrucaoModo modo,
                   InstrucaoImplementacao implementacao);
-        std::optional<tipos::uint16> buscar_endereco(Cpu* cpu);
+        std::optional<tipos::uint16> buscar_endereco(CpuInterface* cpu);
     };
 
     std::array<std::optional<Instrucao>, 256> carregar_instrucoes();

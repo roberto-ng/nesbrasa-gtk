@@ -25,13 +25,6 @@ add_executable(nesbrasa-gtk
     ${GRESOURCE_C}
 )
 
-target_sources(nesbrasa-gtk
-    PRIVATE
-        FILE_SET cxx_modules TYPE CXX_MODULES
-        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
-        FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/nesbrasa.gtk.cppm
-)
-
 target_link_libraries(nesbrasa-gtk PRIVATE nesbrasa PkgConfig::GTKMM)
 target_include_directories(nesbrasa-gtk PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

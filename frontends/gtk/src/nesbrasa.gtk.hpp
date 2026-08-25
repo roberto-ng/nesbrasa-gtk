@@ -1,26 +1,22 @@
-module;
+#pragma once
 
 #include <array>
 #include <filesystem>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
 #include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 #include <gtkmm.h>
 
-export module nesbrasa.gtk;
-export import nesbrasa;
+import nesbrasa;
 
-export namespace nesbrasa::gui
+namespace nesbrasa::gui
 {
     using std::array;
     using std::optional;
     using std::string;
     using std::unique_ptr;
-        using nesbrasa::nucleo::Nes;
+    using nesbrasa::nucleo::Nes;
     using nesbrasa::tipos::uint32;
 
     class JanelaPrincipal : public Gtk::Window

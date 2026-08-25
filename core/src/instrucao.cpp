@@ -26,8 +26,7 @@ module;
 #include <string>
 module nesbrasa.instruction;
 import nesbrasa.types;
-import nesbrasa.cpu;
-import nesbrasa.memory;
+import nesbrasa.ports;
 import nesbrasa.util;
 
 using namespace nesbrasa::tipos;
@@ -55,7 +54,7 @@ namespace nesbrasa::nucleo
         this->implementacao = implementacao;
     }
 
-    optional<uint16> Instrucao::buscar_endereco(Cpu* cpu)
+    optional<uint16> Instrucao::buscar_endereco(CpuInterface* cpu)
     {
         cpu->is_pag_alterada = false;
 
@@ -137,7 +136,7 @@ namespace nesbrasa::nucleo
     Instrução ADC
     A + M + C -> A, C
     */
-    static void instrucao_adc(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_adc(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -169,7 +168,7 @@ namespace nesbrasa::nucleo
     Instrução AND
     A AND M -> A
     */
-    static void instrucao_and(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_and(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -187,7 +186,7 @@ namespace nesbrasa::nucleo
     Instrução shift para a esquerda.
     Utiliza a memoria ou o acumulador
     */
-    static void instrucao_asl(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_asl(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (instrucao->modo == InstrucaoModo::ACM)
         {
@@ -218,7 +217,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'c' não estiver ativa
-    static void instrucao_bcc(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bcc(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->c == false)
         {
@@ -228,7 +227,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'c' estiver ativa
-    static void instrucao_bcs(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bcs(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->c == true)
         {
@@ -238,7 +237,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'z' estiver ativa
-    static void instrucao_beq(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_beq(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->z == true)
         {
@@ -252,7 +251,7 @@ namespace nesbrasa::nucleo
     e a posição 6 do byte em 'v'.
     A flag 'z' tambem é alterada sendo calculada com 'a' AND valor
     */
-    static void instrucao_bit(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bit(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -262,7 +261,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'n' estiver ativa
-    static void instrucao_bmi(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bmi(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->n == true)
         {
@@ -272,7 +271,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'z' não estiver ativa
-    static void instrucao_bne(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bne(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->z == false)
         {
@@ -282,7 +281,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'n' não estiver ativa
-    static void instrucao_bpl(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bpl(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->n == false)
         {
@@ -292,7 +291,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Instrução BRK
-    static void instrucao_brk(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_brk(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->stack_empurrar_16_bits(cpu->pc);
         cpu->stack_empurrar(cpu->get_estado());
@@ -302,7 +301,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'v' não estiver ativa
-    static void instrucao_bvc (Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bvc (Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->v == false)
         {
@@ -312,7 +311,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula para o endereço indicado se a flag 'v' estiver ativa
-    static void instrucao_bvs(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_bvs(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (cpu->v == true)
         {
@@ -322,31 +321,31 @@ namespace nesbrasa::nucleo
     }
 
     //! Limpa a flag 'c'
-    static void instrucao_clc(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_clc(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->c = false;
     }
 
     //! Limpa a flag 'd'
-    static void instrucao_cld(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_cld(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->d = false;
     }
 
     //! Limpa a flag 'i'
-    static void instrucao_cli(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_cli(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->i = false;
     }
 
     //! Limpa a flag 'v'
-    static void instrucao_clv(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_clv(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->v = false;
     }
 
     //! Compara o acumulador com um valor
-    static void instrucao_cmp(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_cmp(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -363,7 +362,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Compara o indice X com um valor
-    static void instrucao_cpx(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_cpx(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -380,7 +379,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Compara o indice Y com um valor
-    static void instrucao_cpy(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_cpy(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -395,7 +394,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Diminui um valor na memoria por 1
-    static void instrucao_dec(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_dec(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -410,7 +409,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Diminui o valor do indice X por 1
-    static void instrucao_dex(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_dex(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->x -= 1;
 
@@ -420,7 +419,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Diminui o valor do indice Y por 1
-    static void instrucao_dey(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_dey(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->y -= 1;
 
@@ -430,7 +429,7 @@ namespace nesbrasa::nucleo
     }
 
     //! OR exclusivo de um valor na memoria com o acumulador
-    static void instrucao_eor(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_eor(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -442,7 +441,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Incrementa um valor na memoria por 1
-    static void instrucao_inc(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_inc(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -457,7 +456,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Incrementa o valor do indice X por 1
-    static void instrucao_inx(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_inx(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->x += 1;
 
@@ -467,7 +466,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Incrementa o valor do indice Y por 1
-    static void instrucao_iny(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_iny(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->y += 1;
 
@@ -477,14 +476,14 @@ namespace nesbrasa::nucleo
     }
 
     //! Pula o programa para o endereço indicado
-    static void instrucao_jmp(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_jmp(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         // muda o endereço
         cpu->pc = endereco.value();
     }
 
     //! Chama uma função/subrotina
-    static void instrucao_jsr(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_jsr(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         // Salva o endereço da próxima instrução subtraído por 1 na stack.
         // O endereço guardado vai ser usado para retornar da função quando
@@ -496,7 +495,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Carrega um valor da memoria no acumulador
-    static void instrucao_lda(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_lda(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->a = cpu->memoria->ler(endereco.value());
         //std::cout << "A: " << std::bitset<8>(cpu->a) << "\n";
@@ -508,7 +507,7 @@ namespace nesbrasa::nucleo
 
 
     //! Carrega um valor da memoria no indice X
-    static void instrucao_ldx(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_ldx(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->x = cpu->memoria->ler(endereco.value());
 
@@ -518,7 +517,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Carrega um valor da memoria no acumulador
-    static void instrucao_ldy(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_ldy(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->y = cpu->memoria->ler(endereco.value());
 
@@ -531,7 +530,7 @@ namespace nesbrasa::nucleo
     Instrução shift para a direita.
     Utiliza a memoria ou o acumulador
     */
-    static void instrucao_lsr(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_lsr(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (instrucao->modo == InstrucaoModo::ACM)
         {
@@ -562,12 +561,12 @@ namespace nesbrasa::nucleo
     }
 
     //! Não fazer nada
-    static void instrucao_nop(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_nop(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
     }
 
     //! Operanção OR entre um valor na memoria e o A
-    static void instrucao_ora(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_ora(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -579,20 +578,20 @@ namespace nesbrasa::nucleo
     }
 
     //! Empurra o valor do acumulador na stack
-    static void instrucao_pha(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_pha(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->stack_empurrar(cpu->a);
     }
 
     //! Empurra o valor do estado do processador na stack
-    static void instrucao_php(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_php(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         const byte estado = cpu->get_estado();
         cpu->stack_empurrar(estado);
     }
 
     //! Puxa um valor da stack e salva esse valor no acumulador
-    static void instrucao_pla(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_pla(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->a = cpu->stack_puxar();
 
@@ -602,14 +601,14 @@ namespace nesbrasa::nucleo
     }
 
     //! Puxa um valor da stack e salva esse valor no estado do processador
-    static void instrucao_plp(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_plp(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         const byte estado = cpu->stack_puxar();
         cpu->set_estado(estado);
     }
 
     //! Gira um valor pra a esquerda
-    static void instrucao_rol(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_rol(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (instrucao->modo == InstrucaoModo::ACM)
         {
@@ -641,7 +640,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Gira um valor pra a direita
-    static void instrucao_ror(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_ror(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         if (instrucao->modo == InstrucaoModo::ACM)
         {
@@ -673,7 +672,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Retorna de uma interupção
-    static void instrucao_rti(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_rti(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         const byte estado = cpu->stack_puxar();
         cpu->set_estado(estado);
@@ -682,13 +681,13 @@ namespace nesbrasa::nucleo
     }
 
     //! Retorna de uma função/sub-rotina
-    static void instrucao_rts(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_rts(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->pc = cpu->stack_puxar_16_bits() + 1;
     }
 
     //! Subtrai um valor da memoria usando o acumulador
-    static void instrucao_sbc(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sbc(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -716,43 +715,43 @@ namespace nesbrasa::nucleo
     }
 
     //! Ativa a flag 'c'
-    static void instrucao_sec(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sec(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->c = true;
     }
 
     //! Ativa a flag 'd'
-    static void instrucao_sed(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sed(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->d = true;
     }
 
     //! Ativa a flag 'i'
-    static void instrucao_sei(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sei(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->i = true;
     }
 
     //! Guarda o valor do acumulador na memoria
-    static void instrucao_sta(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sta(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->memoria->escrever(endereco.value(), cpu->a);
     }
 
     //! Guarda o valor do registrador 'x' na memoria
-    static void instrucao_stx(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_stx(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->memoria->escrever(endereco.value(), cpu->x);
     }
 
     //! Guarda o valor do registrador 'y' na memoria
-    static void instrucao_sty(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sty(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->memoria->escrever(endereco.value(), cpu->y);
     }
 
     //! Atribui o valor do acumulador ao registrador 'x'
-    static void instrucao_tax(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_tax(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->x = cpu->a;
 
@@ -762,7 +761,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Atribui o valor do acumulador ao registrador 'y'
-    static void instrucao_tay(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_tay(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->y = cpu->a;
 
@@ -772,7 +771,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Atribui o valor do ponteiro da stack ao registrador 'x'
-    static void instrucao_tsx(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_tsx(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->x = cpu->sp;
 
@@ -782,7 +781,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Atribui o valor do registrador 'x' ao acumulador
-    static void instrucao_txa(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_txa(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->a = cpu->x;
 
@@ -792,13 +791,13 @@ namespace nesbrasa::nucleo
     }
 
     //! Atribui o valor do registrador 'x' ao ponteiro da stack
-    static void instrucao_txs(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_txs(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->sp = cpu->x;
     }
 
     //! Atribui o valor do registrador 'y' ao acumulador
-    static void instrucao_tya(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_tya(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         cpu->a = cpu->y;
 
@@ -808,17 +807,17 @@ namespace nesbrasa::nucleo
     }
 
     //! Instrução não-oficial *DOP - nenhuma operação
-    static void instrucao_dop(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_dop(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
     }
 
     //! Instrução não-oficial *TOP - nenhuma operação
-    static void instrucao_top(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_top(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
     }
 
     //! Instrução não-oficial *LAX - Transfere um valor da memória para A e X
-    static void instrucao_lax(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_lax(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -830,7 +829,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Instrução não-oficial *SAX - Faz a operação AND entre o A e o X e guarda o resultado na memória
-    static void instrucao_sax(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sax(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->a & cpu->x;
 
@@ -838,7 +837,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Instrução não-oficial *DCP - Subtrai um valor da memória e compara o resultado com A
-    static void instrucao_dcp(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_dcp(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
         byte resultado = valor - 1;
@@ -859,7 +858,7 @@ namespace nesbrasa::nucleo
     }
 
     //! Instrução não-oficial *ISB - Incrementa um valor na memória, depois subtrai este valor por A
-    static void instrucao_isb(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_isb(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
         byte resultado = valor + 1;
@@ -893,7 +892,7 @@ namespace nesbrasa::nucleo
     Instrução não-oficial *SLO: 
     Realiza um shift para a esquerda em um valor,e depois a operação OR entre A e o valor
     */
-    static void instrucao_slo(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_slo(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -915,7 +914,7 @@ namespace nesbrasa::nucleo
     Instrução não-oficial *RLA: 
     Gira um valor na memória para a esquerda, e depois realiza a operação AND entre A e o valor
     */
-    static void instrucao_rla(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_rla(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -939,7 +938,7 @@ namespace nesbrasa::nucleo
     Instrução não-oficial *SRE: 
     Realiza um shift para a direita em um valor, e depois a operação EOR entre A e o valor
     */
-    static void instrucao_sre(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_sre(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 
@@ -961,7 +960,7 @@ namespace nesbrasa::nucleo
     Instrução não-oficial *RRA: 
     Gira um valor na memória para a direita, e depois soma o valor com A e C
     */
-    static void instrucao_rra(Instrucao* instrucao, Cpu* cpu, optional<uint16> endereco)
+    static void instrucao_rra(Instrucao* instrucao, CpuInterface* cpu, optional<uint16> endereco)
     {
         byte valor = cpu->memoria->ler(endereco.value());
 

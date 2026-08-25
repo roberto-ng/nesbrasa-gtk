@@ -9,7 +9,7 @@ set_target_properties(nesbrasa-web PROPERTIES
     OUTPUT_NAME nesbrasa
 )
 
-target_compile_options(nesbrasa-web PRIVATE -O2)
+target_compile_options(nesbrasa-web PRIVATE -O2 -fPIC)
 target_link_options(nesbrasa-web PRIVATE
     -sMODULARIZE=1
     -sEXPORT_ES6=1
