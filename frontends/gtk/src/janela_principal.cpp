@@ -116,6 +116,10 @@ namespace nesbrasa::gui
 #if defined(_WIN32)
         // usar barra de menu no Windows
         this->barra_menu->show();
+#elif defined(__APPLE__)
+        // O menu da aplicação é publicado na barra de menus global do macOS.
+        this->barra_menu->hide();
+        this->set_decorated(true);
 #else
         // usar headerbar 
         this->set_titlebar(*this->headerbar);
@@ -218,6 +222,11 @@ namespace nesbrasa::gui
     {
         // fechar janela
         this->close();
+    }
+
+    void JanelaPrincipal::ao_abrir_configuracoes()
+    {
+        this->abrir_configuracoes();
     }
 
     void JanelaPrincipal::carregar_configuracoes()

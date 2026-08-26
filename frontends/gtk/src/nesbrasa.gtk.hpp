@@ -48,6 +48,7 @@ namespace nesbrasa::gui
     public:
         JanelaPrincipal();
         void ao_clicar_btn_abrir();
+        void ao_abrir_configuracoes();
         void ao_fechar_janela();
         bool ao_atualizar(const Glib::RefPtr<Gdk::FrameClock>& frame_clock);
         bool ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr);
