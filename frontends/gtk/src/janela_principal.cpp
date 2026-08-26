@@ -109,6 +109,7 @@ namespace nesbrasa::gui
         this->builder->get_widget("barra_mi_sair", this->barra_mi_sair);
         this->builder->get_widget("barra_mi_configuracoes", this->barra_mi_configuracoes);
         this->builder->get_widget("btn_abrir", this->btn_abrir);
+        this->builder->get_widget("btn_abrir_rom", this->btn_abrir_rom);
         this->builder->get_widget("barra_mi_abrir", this->barra_mi_abrir);
 
         this->add(*this->raiz);
@@ -128,6 +129,12 @@ namespace nesbrasa::gui
 
         this->scroll->show_all_children();
 
+#if defined(_WIN32) || defined(__APPLE__)
+        this->btn_abrir_rom->show();
+#else
+        this->btn_abrir_rom->hide();
+#endif
+
         this->set_title("Nesbrasa");
 
         this->property_default_height() = LARGURA;
@@ -143,6 +150,7 @@ namespace nesbrasa::gui
         this->barra_mi_configuracoes->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::abrir_configuracoes));
 
         this->btn_abrir->signal_clicked().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
+        this->btn_abrir_rom->signal_clicked().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
         this->barra_mi_abrir->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
 
         this->quadro->signal_draw().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_desenhar_quadro));
@@ -191,6 +199,7 @@ namespace nesbrasa::gui
                     string caminho = dialogo->get_filename();                    
                     auto arquivo = ler_arquivo(caminho);
                     nes->carregar_rom(arquivo);
+                    this->btn_abrir_rom->hide();
 
                     break;
                 }

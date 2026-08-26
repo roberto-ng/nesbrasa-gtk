@@ -36,6 +36,7 @@ namespace nesbrasa::gui
         Gtk::MenuItem* barra_mi_configuracoes;
         Gtk::MenuItem* barra_mi_abrir;
         Gtk::Button* btn_abrir;
+        Gtk::Button* btn_abrir_rom;
         Gtk::Box* raiz;
         Gtk::DrawingArea* quadro;
         Gtk::ScrolledWindow* scroll;
