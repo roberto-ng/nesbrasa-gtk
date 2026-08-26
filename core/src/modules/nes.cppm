@@ -18,7 +18,7 @@ import nesbrasa.ports;
 
 export namespace nesbrasa::nucleo
 {
-    class Nes : public InterruptSink
+    class Nes : public InterruptSink, public DmaSink
     {
     public:
         static constexpr int TELA_LARGURA = 256;
@@ -38,6 +38,7 @@ export namespace nesbrasa::nucleo
         void set_botao(Botao botao, bool pressionado);
         bool programa_carregado() const;
         void ativar_interrupcao(Interrupcao) override;
+        void solicitar_dma(tipos::byte) override;
     };
 }
 
@@ -58,7 +59,7 @@ namespace nesbrasa::nucleo
     Nes::Nes(): 
         memoria(),
         cpu(&this->memoria),
-        ppu(&this->memoria, nullptr, this, &this->cpu)
+        ppu(&this->memoria, nullptr, this, this)
     {
         mapeadores::registrar_nrom();
         this->memoria.configurar(&this->ppu, &this->controle_1, &this->controle_2, nullptr, this);
@@ -175,5 +176,14 @@ namespace nesbrasa::nucleo
     void Nes::ativar_interrupcao(Interrupcao interrupcao)
     {
         this->cpu.interrupcao = interrupcao;
+    }
+
+    void Nes::solicitar_dma(byte)
+    {
+        this->cpu.esperar_adicionar(513);
+        if ((this->cpu.get_ciclos() % 2) == 1)
+        {
+            this->cpu.esperar_adicionar(1);
+        }
     }
 }

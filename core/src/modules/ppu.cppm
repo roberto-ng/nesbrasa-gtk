@@ -6,7 +6,6 @@ export module nesbrasa.ppu;
 import nesbrasa.cores;
 import nesbrasa.types;
 import nesbrasa.ports;
-import nesbrasa.cpu.interface;
 
 export namespace nesbrasa::nucleo
 {
@@ -18,7 +17,7 @@ export namespace nesbrasa::nucleo
         CpuBus* memoria;
         CartridgePort* cartucho;
         InterruptSink* interrupcoes;
-        CpuInterface* cpu;
+        DmaSink* dma;
         int ciclo, scanline;
         tipos::uint64 frame;
         std::array<tipos::byte, 0x20> paletas;
@@ -40,7 +39,7 @@ export namespace nesbrasa::nucleo
         bool flag_sprite_habilitar_col_esquerda, flag_fundo_habilitar_col_esquerda, flag_escala_cinza;
         bool flag_sprite_zero, flag_sprite_transbordamento;
     public:
-        Ppu(CpuBus*, CartridgePort*, InterruptSink*, CpuInterface*);
+        Ppu(CpuBus*, CartridgePort*, InterruptSink*, DmaSink*);
         void configurar_cartucho(CartridgePort*);
         void reiniciar(); void atualizar(); void avancar();
         tipos::byte ler(tipos::uint16); void escrever(tipos::uint16, tipos::byte);
@@ -73,9 +72,9 @@ namespace nesbrasa::nucleo
         array<uint16, 4> {0, 1, 2, 3},
     };
 
-    Ppu::Ppu(CpuBus* memoria, CartridgePort* cartucho, InterruptSink* interrupcoes, CpuInterface* cpu):
+    Ppu::Ppu(CpuBus* memoria, CartridgePort* cartucho, InterruptSink* interrupcoes, DmaSink* dma):
         memoria(memoria),
-        cartucho(cartucho), interrupcoes(interrupcoes), cpu(cpu),
+        cartucho(cartucho), interrupcoes(interrupcoes), dma(dma),
         frente(std::make_unique<Framebuffer>()),
         fundo(std::make_unique<Framebuffer>())
     {
@@ -921,11 +920,7 @@ namespace nesbrasa::nucleo
             ponteiro++;
         }
 
-        this->cpu->esperar_adicionar(513);
-        if ((this->cpu->get_ciclos() % 2) == 1)
-        {
-            this->cpu->esperar_adicionar(1);
-        }
+        this->dma->solicitar_dma(valor);
     }
 
     byte Ppu::get_dados()
