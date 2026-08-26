@@ -18,7 +18,8 @@
       "cacheVariables": {
         "BUILD_TESTING": "OFF",
         "BUILD_WEB": "ON",
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     }
   ],

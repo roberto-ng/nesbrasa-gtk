@@ -8,3 +8,4 @@ frontends/web/.emscripten-cache
 /.flatpak-builder
 /.vscode/ipch
 *.ui~
+.vscode
