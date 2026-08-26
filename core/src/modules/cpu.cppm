@@ -108,10 +108,53 @@ export namespace nesbrasa::nucleo
     private:
     void executar(Instrucao* instrucao)
     {
-        auto endereco = instrucao->buscar_endereco(this);
+        auto endereco = this->buscar_endereco(instrucao->modo);
         
         this->pc += instrucao->bytes;
         instrucao->implementacao(this, instrucao->modo, endereco);
+    }
+
+    optional<uint16> buscar_endereco(InstrucaoModo modo)
+    {
+        this->is_pag_alterada = false;
+
+        switch (modo)
+        {
+            case InstrucaoModo::ACM:
+            case InstrucaoModo::IMPL: return std::nullopt;
+            case InstrucaoModo::IMED: return this->pc + 1;
+            case InstrucaoModo::P_ZERO: return this->memoria->ler(this->pc + 1);
+            case InstrucaoModo::P_ZERO_X: return (this->memoria->ler(this->pc + 1) + this->x) & 0xFF;
+            case InstrucaoModo::P_ZERO_Y: return (this->memoria->ler(this->pc + 1) + this->y) & 0xFF;
+            case InstrucaoModo::ABS: return this->memoria->ler_16_bits(this->pc + 1);
+            case InstrucaoModo::ABS_X:
+            {
+                uint16 endereco = this->memoria->ler_16_bits(this->pc + 1) + this->x;
+                this->is_pag_alterada = !comparar_paginas(endereco - this->x, endereco);
+                return endereco;
+            }
+            case InstrucaoModo::ABS_Y:
+            {
+                uint16 endereco = this->memoria->ler_16_bits(this->pc + 1) + this->y;
+                this->is_pag_alterada = !comparar_paginas(endereco - this->y, endereco);
+                return endereco;
+            }
+            case InstrucaoModo::IND: return this->memoria->ler_16_bits_bug(this->memoria->ler_16_bits(this->pc + 1));
+            case InstrucaoModo::IND_X: return this->memoria->ler_16_bits_bug((this->memoria->ler(this->pc + 1) + this->x) % 0x100);
+            case InstrucaoModo::IND_Y:
+            {
+                uint16 endereco = this->memoria->ler_16_bits_bug(this->memoria->ler(this->pc + 1)) + this->y;
+                this->is_pag_alterada = !comparar_paginas(endereco - this->y, endereco);
+                return endereco;
+            }
+            case InstrucaoModo::REL:
+            {
+                uint16 valor = this->memoria->ler(this->pc + 1);
+                return valor < 0x80 ? this->pc + 2 + valor : this->pc + 2 + valor - 0x100;
+            }
+        }
+
+        return 0;
     }
 
     public:
@@ -259,7 +302,7 @@ export namespace nesbrasa::nucleo
             {
                 stringstream ss;
 
-                uint16 endereco = instrucao.buscar_endereco(this).value();
+                uint16 endereco = this->buscar_endereco(instrucao.modo).value();
                 ss << instrucao.nome << " $" << std::uppercase << std::hex << endereco;
             
                 return ss.str();
@@ -333,7 +376,7 @@ export namespace nesbrasa::nucleo
 
             case InstrucaoModo::REL:
             {
-                int endereco = instrucao.buscar_endereco(this).value();
+                int endereco = this->buscar_endereco(instrucao.modo).value();
 
                 stringstream ss;
                 ss << instrucao.nome << " $" << std::uppercase << std::hex << endereco << "";
