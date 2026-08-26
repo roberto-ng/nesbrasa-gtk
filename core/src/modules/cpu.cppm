@@ -9,7 +9,6 @@ export module nesbrasa.cpu;
 import nesbrasa.util;
 import nesbrasa.types;
 import nesbrasa.ports;
-import nesbrasa.cpu.interface;
 import nesbrasa.instruction;
 
 using namespace nesbrasa::tipos;
@@ -20,8 +19,18 @@ using std::runtime_error;
 
 export namespace nesbrasa::nucleo
 {
-    class Cpu : public CpuInterface
+    std::array<std::optional<Instrucao>, 256> carregar_instrucoes();
+
+    class Cpu
     {
+    public:
+        CpuBus* memoria;
+        Interrupcao interrupcao;
+        tipos::uint16 pc;
+        tipos::byte sp, a, x, y;
+        bool c, z, i, d, b, v, n, is_pag_alterada;
+
+    private:
         tipos::uint16 esperar;
         tipos::uint32 ciclos;
         std::array<std::optional<Instrucao>, 256> instrucoes;
@@ -111,8 +120,10 @@ export namespace nesbrasa::nucleo
         auto endereco = this->buscar_endereco(instrucao->modo);
         
         this->pc += instrucao->bytes;
-        instrucao->implementacao(this, instrucao->modo, endereco);
+        this->executar_operacao(instrucao->operacao, instrucao->modo, endereco);
     }
+
+    void executar_operacao(InstrucaoOperacao, InstrucaoModo, optional<uint16>);
 
     optional<uint16> buscar_endereco(InstrucaoModo modo)
     {

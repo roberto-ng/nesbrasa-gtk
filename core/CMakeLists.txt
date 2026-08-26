@@ -4,7 +4,6 @@ add_library(nesbrasa SHARED
 set(NESBRASA_MODULES
     src/modules/types.cppm
     src/modules/ports.cppm
-    src/modules/cpu.interface.cppm
     src/modules/memory.cppm
     src/modules/instruction.cppm
     src/modules/cpu.cppm
@@ -17,6 +16,8 @@ set(NESBRASA_MODULES
     src/modules/nes.cppm
     src/modules/nesbrasa.cppm
 )
+
+target_sources(nesbrasa PRIVATE src/modules/cpu.instructions.cpp)
 
 target_sources(nesbrasa
     PUBLIC
