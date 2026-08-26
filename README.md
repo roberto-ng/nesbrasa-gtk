@@ -20,6 +20,15 @@ cmake --build build
 
 O executável GTK será criado em `build/frontends/gtk/nesbrasa-gtk`.
 
+Para uma compilação otimizada de release do frontend GTK, use o preset:
+
+```
+cmake --preset gtk-release
+cmake --build --preset gtk-release
+```
+
+O executável será criado em `build/gtk-release/frontends/gtk/nesbrasa-gtk`.
+
 Para executar os testes:
 
 ```

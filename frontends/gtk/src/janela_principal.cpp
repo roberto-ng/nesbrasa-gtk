@@ -205,6 +205,9 @@ namespace nesbrasa::gui
                     nes->carregar_rom(arquivo);
                     this->btn_abrir_rom->hide();
                     this->btn_configuracoes->hide();
+                    this->quadro->grab_focus();
+                    this->ultimo_tempo_frame = 0;
+                    this->quadros_acumulados = 0.0;
 
                     break;
                 }
@@ -380,18 +383,48 @@ namespace nesbrasa::gui
     {
         if (!this->nes->programa_carregado())
         {
+            this->ultimo_tempo_frame = 0;
+            this->quadros_acumulados = 0.0;
             return G_SOURCE_CONTINUE;
         }
 
-        // dar foco ao quadro
-        this->quadro->grab_focus();
-        
-        // Nes::avancar executa uma instrução completa e retorna quantos
-        // ciclos de CPU ela consumiu. Avançar um número fixo de instruções
-        // fazia a emulação correr várias vezes mais rápido que um quadro.
-        this->nes->avancar_quadro();
+        // Use the monotonic frame-clock time as a pacing source instead of
+        // assuming that one display refresh equals one NES frame. This keeps
+        // the emulation speed independent of the monitor refresh rate.
+        constexpr double QUADROS_POR_SEGUNDO = 1789772.7272727273 / 29780.0;
+        constexpr double MAX_TEMPO_DECORRIDO = 0.25;
+        constexpr double MAX_QUADROS_ATRASADOS = 5.0;
 
-        this->quadro->queue_draw();
+        const gint64 tempo_atual = frame_clock->get_frame_time();
+        if (this->ultimo_tempo_frame == 0)
+        {
+            this->ultimo_tempo_frame = tempo_atual;
+            return G_SOURCE_CONTINUE;
+        }
+
+        double tempo_decorrido =
+            static_cast<double>(tempo_atual - this->ultimo_tempo_frame) / 1'000'000.0;
+        this->ultimo_tempo_frame = tempo_atual;
+
+        // Avoid a pause, debugger stop, or sleep causing an unbounded catch-up.
+        if (tempo_decorrido < 0.0)
+            tempo_decorrido = 0.0;
+        tempo_decorrido = std::min(tempo_decorrido, MAX_TEMPO_DECORRIDO);
+        this->quadros_acumulados = std::min(
+            this->quadros_acumulados + tempo_decorrido * QUADROS_POR_SEGUNDO,
+            MAX_QUADROS_ATRASADOS
+        );
+
+        bool atualizou = false;
+        while (this->quadros_acumulados >= 1.0)
+        {
+            this->nes->avancar_quadro();
+            this->quadros_acumulados -= 1.0;
+            atualizou = true;
+        }
+
+        if (atualizou)
+            this->quadro->queue_draw();
         return G_SOURCE_CONTINUE;
     }
 
@@ -442,20 +475,20 @@ namespace nesbrasa::gui
             pos_y = (altura - altura_escalada) / 2.0;
         }
 
-        auto textura_escalada = this->textura_tela->scale_simple(
-            largura_escalada, 
-            altura_escalada, 
-            Gdk::InterpType::INTERP_NEAREST
-        );
-
         // renderizar fundo
         auto estilo = this->quadro->get_style_context();
         estilo->render_background(cr, 0, 0, largura, altura);
 
-        // renderizar o buffer da tela
-        Gdk::Cairo::set_source_pixbuf(cr, textura_escalada, pos_x, pos_y);
-        cr->rectangle(pos_x, pos_y, textura_escalada->get_width(), textura_escalada->get_height());
+        // Renderizar o buffer diretamente com uma transformação do Cairo.
+        // Isso evita alocar e redimensionar um novo Pixbuf a cada quadro.
+        cr->save();
+        cr->translate(pos_x, pos_y);
+        cr->scale(escala, escala);
+        Gdk::Cairo::set_source_pixbuf(cr, this->textura_tela, 0, 0);
+        cairo_pattern_set_filter(cairo_get_source(cr->cobj()), CAIRO_FILTER_NEAREST);
+        cr->rectangle(0, 0, NES_TELA_LARGURA, NES_TELA_ALTURA);
         cr->fill();
+        cr->restore();
 
         return false;
     }

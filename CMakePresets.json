@@ -7,6 +7,17 @@
   },
   "configurePresets": [
     {
+      "name": "gtk-release",
+      "displayName": "GTK (Release)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/gtk-release",
+      "cacheVariables": {
+        "BUILD_TESTING": "OFF",
+        "BUILD_WEB": "OFF",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
       "name": "web-emscripten",
       "displayName": "Web (Emscripten)",
       "generator": "Ninja",
@@ -24,6 +35,11 @@
     }
   ],
   "buildPresets": [
+    {
+      "name": "gtk-release",
+      "configurePreset": "gtk-release",
+      "targets": ["nesbrasa-gtk"]
+    },
     {
       "name": "web-emscripten",
       "configurePreset": "web-emscripten",

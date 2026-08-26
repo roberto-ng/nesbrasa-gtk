@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <filesystem>
 #include <memory>
@@ -43,6 +44,8 @@ namespace nesbrasa::gui
         Gtk::ScrolledWindow* scroll;
         array<guint, 8> teclas;
         std::filesystem::path caminho_configuracao;
+        gint64 ultimo_tempo_frame = 0;
+        double quadros_acumulados = 0.0;
         void abrir_configuracoes();
         void atualizar_controle(guint tecla, bool pressionado);
         void carregar_configuracoes();
