@@ -9,6 +9,7 @@ export module nesbrasa.cpu;
 import nesbrasa.util;
 import nesbrasa.types;
 import nesbrasa.ports;
+import nesbrasa.cpu.interface;
 import nesbrasa.instruction;
 
 using namespace nesbrasa::tipos;

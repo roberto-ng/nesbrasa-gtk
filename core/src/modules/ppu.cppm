@@ -6,6 +6,7 @@ export module nesbrasa.ppu;
 import nesbrasa.cores;
 import nesbrasa.types;
 import nesbrasa.ports;
+import nesbrasa.cpu.interface;
 
 export namespace nesbrasa::nucleo
 {

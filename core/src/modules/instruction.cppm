@@ -10,6 +10,7 @@ export module nesbrasa.instruction;
 import nesbrasa.util;
 import nesbrasa.types;
 import nesbrasa.ports;
+import nesbrasa.cpu.interface;
 
 export namespace nesbrasa::nucleo
 {
