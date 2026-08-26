@@ -28,8 +28,78 @@ export namespace nesbrasa::nucleo
 
         Instrucao(std::string nome, tipos::byte bytes, tipos::int32 ciclos,
                   tipos::int32 ciclos_pag_alt, InstrucaoModo modo,
-                  InstrucaoImplementacao implementacao);
-        std::optional<tipos::uint16> buscar_endereco(CpuInterface* cpu);
+                  InstrucaoImplementacao implementacao):
+            nome(nome), bytes(bytes), ciclos(ciclos), ciclos_pag_alt(ciclos_pag_alt),
+            modo(modo), implementacao(implementacao) {}
+
+        std::optional<tipos::uint16> buscar_endereco(CpuInterface* cpu)
+        {
+            cpu->is_pag_alterada = false;
+
+            switch (this->modo)
+            {
+                case InstrucaoModo::ACM:
+                case InstrucaoModo::IMPL:
+                    return std::nullopt;
+
+                case InstrucaoModo::IMED:
+                    return cpu->pc + 1;
+
+                case InstrucaoModo::P_ZERO:
+                    return cpu->memoria->ler(cpu->pc + 1);
+
+                case InstrucaoModo::P_ZERO_X:
+                    return (cpu->memoria->ler(cpu->pc + 1) + cpu->x) & 0xFF;
+
+                case InstrucaoModo::P_ZERO_Y:
+                    return (cpu->memoria->ler(cpu->pc + 1) + cpu->y) & 0xFF;
+
+                case InstrucaoModo::ABS:
+                    return cpu->memoria->ler_16_bits(cpu->pc + 1);
+
+                case InstrucaoModo::ABS_X:
+                {
+                    tipos::uint16 endereco = cpu->memoria->ler_16_bits(cpu->pc + 1) + cpu->x;
+                    cpu->is_pag_alterada = !comparar_paginas(endereco - cpu->x, endereco);
+                    return endereco;
+                }
+
+                case InstrucaoModo::ABS_Y:
+                {
+                    tipos::uint16 endereco = cpu->memoria->ler_16_bits(cpu->pc + 1) + cpu->y;
+                    cpu->is_pag_alterada = !comparar_paginas(endereco - cpu->y, endereco);
+                    return endereco;
+                }
+
+                case InstrucaoModo::IND:
+                {
+                    const tipos::uint16 valor = cpu->memoria->ler_16_bits(cpu->pc + 1);
+                    return cpu->memoria->ler_16_bits_bug(valor);
+                }
+
+                case InstrucaoModo::IND_X:
+                {
+                    const tipos::uint16 valor = cpu->memoria->ler(cpu->pc + 1);
+                    return cpu->memoria->ler_16_bits_bug((valor + cpu->x) % 0x100);
+                }
+
+                case InstrucaoModo::IND_Y:
+                {
+                    const tipos::uint16 valor = cpu->memoria->ler(cpu->pc + 1);
+                    tipos::uint16 endereco = cpu->memoria->ler_16_bits_bug(valor) + cpu->y;
+                    cpu->is_pag_alterada = !comparar_paginas(endereco - cpu->y, endereco);
+                    return endereco;
+                }
+
+                case InstrucaoModo::REL:
+                {
+                    const tipos::uint16 valor = cpu->memoria->ler(cpu->pc + 1);
+                    return valor < 0x80 ? cpu->pc + 2 + valor : cpu->pc + 2 + valor - 0x100;
+                }
+            }
+
+            return 0;
+        }
     };
 
     std::array<std::optional<Instrucao>, 256> carregar_instrucoes();
@@ -44,101 +114,6 @@ using std::string;
 
 namespace nesbrasa::nucleo
 {
-    Instrucao::Instrucao(
-        string nome,
-        byte bytes,
-        int32 ciclos,
-        int32 ciclos_pag_alt,
-        InstrucaoModo modo,
-        InstrucaoImplementacao implementacao
-    )
-    {
-        this->nome = nome;
-        this->bytes = bytes;
-        this->ciclos = ciclos;
-        this->ciclos_pag_alt = ciclos_pag_alt;
-        this->modo = modo;
-        this->implementacao = implementacao;
-    }
-
-    optional<uint16> Instrucao::buscar_endereco(CpuInterface* cpu)
-    {
-        cpu->is_pag_alterada = false;
-
-        switch (this->modo)
-        {
-            case InstrucaoModo::ACM:
-                return nullopt;
-
-            case InstrucaoModo::IMPL:
-                return nullopt;
-
-            case InstrucaoModo::IMED:
-                return cpu->pc + 1;
-
-            case InstrucaoModo::P_ZERO:
-                return cpu->memoria->ler(cpu->pc + 1);
-
-            case InstrucaoModo::P_ZERO_X:
-                return (cpu->memoria->ler(cpu->pc + 1) + cpu->x) & 0xFF;
-
-            case InstrucaoModo::P_ZERO_Y:
-                return (cpu->memoria->ler(cpu->pc + 1) + cpu->y) & 0xFF;
-
-            case InstrucaoModo::ABS:
-                return cpu->memoria->ler_16_bits(cpu->pc + 1);
-
-            case InstrucaoModo::ABS_X:
-            {
-                uint16 endereco = cpu->memoria->ler_16_bits(cpu->pc + 1) + cpu->x;
-                cpu->is_pag_alterada = !comparar_paginas(endereco - cpu->x, endereco);
-
-                return endereco;
-            }
-
-            case InstrucaoModo::ABS_Y:
-            {
-                uint16 endereco =  cpu->memoria->ler_16_bits(cpu->pc + 1) + cpu->y;
-                cpu->is_pag_alterada = !comparar_paginas(endereco - cpu->y, endereco);
-
-                return endereco;
-            }
-
-            case InstrucaoModo::IND:
-            {
-                const uint16 valor = cpu->memoria->ler_16_bits(cpu->pc+1);
-                return cpu->memoria->ler_16_bits_bug(valor);
-            }
-
-            case InstrucaoModo::IND_X:
-            {
-                const uint16 valor = cpu->memoria->ler(cpu->pc + 1);
-                return cpu->memoria->ler_16_bits_bug((valor + cpu->x)%0x100);
-            }
-
-            case InstrucaoModo::IND_Y:
-            {
-                const uint16 valor = cpu->memoria->ler(cpu->pc + 1);
-                uint16 endereco = cpu->memoria->ler_16_bits_bug(valor) + cpu->y;
-                cpu->is_pag_alterada = !comparar_paginas(endereco - cpu->y, endereco);
-
-                return endereco;
-            }
-
-            case InstrucaoModo::REL:
-            {
-                const uint16 valor = cpu->memoria->ler(cpu->pc + 1);
-
-                if (valor < 0x80)
-                    return cpu->pc + 2 + valor;
-                else
-                    return cpu->pc + 2 + valor - 0x100;
-            }
-        }
-
-        return 0;
-    }
-
     /*!
     Instrução ADC
     A + M + C -> A, C
