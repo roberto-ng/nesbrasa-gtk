@@ -9,7 +9,8 @@
 #include <QDialogButtonBox>
 #include <QEvent>
 #include <QFileDialog>
-#include <QFormLayout>
+#include <QFont>
+#include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMenuBar>
@@ -251,11 +252,23 @@ namespace nesbrasa::gui
     {
         QDialog dialogo(this);
         dialogo.setWindowTitle(QStringLiteral("Configurações"));
+        dialogo.setMinimumWidth(400);
         auto* layout = new QVBoxLayout(&dialogo);
+        layout->setContentsMargins(28, 24, 28, 20);
+        layout->setSpacing(16);
+
+        auto* titulo = new QLabel(QStringLiteral("Controles do emulador"), &dialogo);
+        auto fonte_titulo = titulo->font();
+        fonte_titulo.setBold(true);
+        fonte_titulo.setPointSize(fonte_titulo.pointSize() + 2);
+        titulo->setFont(fonte_titulo);
+        layout->addWidget(titulo);
+
         auto* ajuda = new QLabel(QStringLiteral("Selecione um controle e pressione a tecla desejada."));
         ajuda->setWordWrap(true);
         layout->addWidget(ajuda);
-        auto* formulario = new QFormLayout;
+        auto* formulario = new QVBoxLayout;
+        formulario->setSpacing(10);
         std::array<QPushButton*, 8> botoes{};
         auto atualizar_rotulos = [&]() {
             for (std::size_t i = 0; i < botoes.size(); ++i)
@@ -265,17 +278,32 @@ namespace nesbrasa::gui
         {
             botoes[i] = new QPushButton(&dialogo);
             botoes[i]->setFocusPolicy(Qt::StrongFocus);
+            botoes[i]->setFixedWidth(160);
             botoes[i]->installEventFilter(this);
             botoes[i]->setProperty("controle", static_cast<int>(i));
-            formulario->addRow(QString::fromLatin1(NOMES_BOTOES[i]), botoes[i]);
+            auto* nome = new QLabel(QString::fromLatin1(NOMES_BOTOES[i]), &dialogo);
+            nome->setFixedWidth(110);
+            nome->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            auto* linha = new QHBoxLayout;
+            linha->setSpacing(20);
+            linha->addWidget(nome);
+            linha->addWidget(botoes[i]);
+            linha->setAlignment(Qt::AlignHCenter);
+            formulario->addLayout(linha);
         }
         layout->addLayout(formulario);
         auto* restaurar = new QPushButton(QStringLiteral("Restaurar padrões"), &dialogo);
+        restaurar->setFixedWidth(160);
         connect(restaurar, &QPushButton::clicked, this, [&]() {
             teclas = TECLAS_PADRAO;
             atualizar_rotulos();
         });
-        layout->addWidget(restaurar, 0, Qt::AlignRight);
+        auto* linha_restaurar = new QHBoxLayout;
+        linha_restaurar->setSpacing(20);
+        linha_restaurar->addSpacing(110);
+        linha_restaurar->addWidget(restaurar);
+        linha_restaurar->setAlignment(Qt::AlignHCenter);
+        formulario->addLayout(linha_restaurar);
         auto* acoes = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialogo);
         connect(acoes, &QDialogButtonBox::accepted, &dialogo, &QDialog::accept);
         connect(acoes, &QDialogButtonBox::rejected, &dialogo, &QDialog::reject);
