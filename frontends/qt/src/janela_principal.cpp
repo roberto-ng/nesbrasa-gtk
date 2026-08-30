@@ -293,14 +293,12 @@ namespace nesbrasa::gui
         }
         layout->addLayout(formulario);
         auto* restaurar = new QPushButton(QStringLiteral("Restaurar padrões"), &dialogo);
-        restaurar->setFixedWidth(160);
+        restaurar->setFixedWidth(290);
         connect(restaurar, &QPushButton::clicked, this, [&]() {
             teclas = TECLAS_PADRAO;
             atualizar_rotulos();
         });
         auto* linha_restaurar = new QHBoxLayout;
-        linha_restaurar->setSpacing(20);
-        linha_restaurar->addSpacing(110);
         linha_restaurar->addWidget(restaurar);
         linha_restaurar->setAlignment(Qt::AlignHCenter);
         formulario->addLayout(linha_restaurar);
