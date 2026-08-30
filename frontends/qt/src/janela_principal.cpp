@@ -145,9 +145,11 @@ namespace nesbrasa::gui
         vazio_layout->addWidget(texto);
         abrir_rom_vazio = new QPushButton(QStringLiteral("Abrir ROM"), vazio);
         abrir_rom_vazio->setDefault(true);
+        abrir_rom_vazio->setFixedWidth(210);
         connect(abrir_rom_vazio, &QPushButton::clicked, this, &JanelaPrincipal::abrir_rom);
         vazio_layout->addWidget(abrir_rom_vazio, 0, Qt::AlignHCenter);
         auto* config_vazio = new QPushButton(QStringLiteral("Configurações"), vazio);
+        config_vazio->setFixedWidth(210);
         connect(config_vazio, &QPushButton::clicked, this, &JanelaPrincipal::abrir_configuracoes);
         vazio_layout->addWidget(config_vazio, 0, Qt::AlignHCenter);
         vazio_layout->addStretch();
