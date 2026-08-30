@@ -96,14 +96,14 @@ namespace nesbrasa::nucleo::mapeadores
     using namespace std::string_literals;
     using namespace nucleo;
 
-    std::unique_ptr<Cartucho> criar_nrom(CartuchoTipo, int prg_qtd, int chr_qtd,
+    inline std::unique_ptr<Cartucho> criar_nrom(CartuchoTipo, int prg_qtd, int chr_qtd,
                                          vector<byte>& arquivo, ArquivoFormato formato,
                                          byte espelhamento)
     {
         return make_unique<NRom>(prg_qtd, chr_qtd, arquivo, formato, espelhamento);
     }
 
-    void registrar_nrom()
+    inline void registrar_nrom()
     {
         registrar_criador_nrom(&criar_nrom);
     }

@@ -99,7 +99,7 @@ namespace nesbrasa::nucleo::mapeadores
 
     // Cartucho::criar owns the factory API, while NRom owns the concrete type.
     // Registration avoids importing mapper.nrom here and breaking the cycle.
-    void registrar_criador_nrom(CartuchoCriador criador)
+    inline void registrar_criador_nrom(CartuchoCriador criador)
     {
         criador_nrom = criador;
     }

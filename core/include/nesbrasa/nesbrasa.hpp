@@ -53,7 +53,7 @@ namespace nesbrasa::nucleo
     using namespace std::string_literals;
     using namespace mapeadores;
 
-    Nes::Nes(): 
+    inline Nes::Nes(): 
         memoria(),
         cpu(&this->memoria),
         ppu(&this->memoria, nullptr, this, this)
@@ -66,7 +66,7 @@ namespace nesbrasa::nucleo
         this->ppu.configurar_cartucho(nullptr);
     }
 
-    void Nes::carregar_rom(vector<byte> arquivo)
+    inline void Nes::carregar_rom(vector<byte> arquivo)
     {
         this->cartucho = nullptr;
         this->is_programa_carregado = false;
@@ -128,7 +128,7 @@ namespace nesbrasa::nucleo
         this->cpu.resetar();
     }
 
-    int Nes::avancar()
+    inline int Nes::avancar()
     {
         if (!this->is_programa_carregado)
         {
@@ -145,7 +145,7 @@ namespace nesbrasa::nucleo
         return cpu_ciclos;
     }
 
-    int Nes::avancar_quadro()
+    inline int Nes::avancar_quadro()
     {
         int ciclos = 0;
         while (ciclos < CICLOS_POR_QUADRO)
@@ -155,27 +155,27 @@ namespace nesbrasa::nucleo
         return ciclos;
     }
 
-    const array<uint32, (256 * 240)>& Nes::get_textura() const
+    inline const array<uint32, (256 * 240)>& Nes::get_textura() const
     {
         return this->ppu.get_textura();
     }
 
-    void Nes::set_botao(Botao botao, bool pressionado)
+    inline void Nes::set_botao(Botao botao, bool pressionado)
     {
         this->controle_1.set_valor(botao, pressionado);
     }
 
-    bool Nes::programa_carregado() const
+    inline bool Nes::programa_carregado() const
     {
         return this->is_programa_carregado;
     }
 
-    void Nes::ativar_interrupcao(Interrupcao interrupcao)
+    inline void Nes::ativar_interrupcao(Interrupcao interrupcao)
     {
         this->cpu.interrupcao = interrupcao;
     }
 
-    void Nes::solicitar_dma(byte)
+    inline void Nes::solicitar_dma(byte)
     {
         this->cpu.esperar_adicionar(513);
         if ((this->cpu.get_ciclos() % 2) == 1)
