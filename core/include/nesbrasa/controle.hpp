@@ -1,53 +1,59 @@
-/* controle.hpp
- *
- * Copyright 2019 Roberto Nazareth <nazarethroberto97@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
+#pragma once
 #include <array>
-
-#include "memoria.hpp"
+#include <nesbrasa/tipos_numeros.hpp>
+#include <nesbrasa/ports.hpp>
 
 namespace nesbrasa::nucleo
 {
-    using std::array;
+    enum class Botao : tipos::uint { A, B, SELECT, START, CIMA, BAIXO, ESQUERDA, DIREITA };
 
-    enum class Botao : uint
+    class Controle : public ControllerPort
     {
-        A          = 0,
-        B          = 1,
-        SELECT     = 2,
-        START      = 3,
-        CIMA       = 4,
-        BAIXO      = 5,
-        ESQUERDA   = 6,
-        DIREITA    = 7,
-    };
-
-    class Controle
-    {
-        array<bool, 8> buffer_botoes;
-        byte indice;
-        byte sinal;
-
+        std::array<bool, 8> buffer_botoes;
+        tipos::byte indice, sinal;
     public:
-        Controle();
+        Controle()
+        {
+            this->buffer_botoes.fill(false);
+            this->indice = 0;
+            this->sinal = false;
+        }
 
-        byte ler();
-        void escrever(byte valor);
+        tipos::byte ler()
+        {
+            tipos::byte valor = 0;
+            if (this->indice < 8 && this->buffer_botoes.at(this->indice) == true)
+            {
+                valor = 1;
+            }
 
-        void set_valor(Botao botao, bool valor);
+            if ((this->sinal & 1) != 0)
+            {
+                this->indice = 0;
+            }
+            else
+            {
+                this->indice += 1;
+            }
+
+            return valor;
+        }
+
+        void escrever(tipos::byte valor)
+        {
+            this->sinal = valor;
+
+            if ((this->sinal & 1) != 0)
+            {
+                this->indice = 0;
+            }
+        }
+
+        void set_valor(Botao botao, bool valor)
+        {
+            tipos::uint botao_indice = static_cast<tipos::uint>(botao);
+            this->buffer_botoes.at(botao_indice) = valor;
+        }
     };
 }
+#pragma once

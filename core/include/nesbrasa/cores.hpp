@@ -1,31 +1,84 @@
-/* cores.hpp
- *
- * Copyright 2019 Roberto Nazareth <nazarethroberto97@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
-
 #include <array>
-
-#include "tipos_numeros.hpp"
+#include <nesbrasa/tipos_numeros.hpp>
 
 namespace nesbrasa::nucleo::cores
 {
-    using std::array;
-    using namespace nesbrasa::tipos;
-
-    extern array<uint32, 0x40> tabela_rgb;
+    extern std::array<tipos::uint32, 0x40> tabela_rgb;
 }
+
+
+using namespace nesbrasa::tipos;
+using std::array;
+
+namespace nesbrasa::nucleo::cores
+{
+    array<uint32, 0x40> tabela_rgb {
+    //  RGB          Sinal NTSC
+        0x7C7C7C, // $00
+        0x0000FC, // $01
+        0x0000BC, // $02
+        0x4428BC, // $03
+        0x940084, // $04
+        0xA80020, // $05
+        0xA81000, // $06
+        0x881400, // $07
+        0x503000, // $08
+        0x007800, // $09
+        0x006800, // $0A
+        0x005800, // $0B
+        0x004058, // $0C
+        0x000000, // $0D
+        0x000000, // $0E
+        0x000000, // $0F
+        0xBCBCBC, // $10
+        0x0078F8, // $11
+        0x0058F8, // $12
+        0x6844FC, // $13
+        0xD800CC, // $14
+        0xE40058, // $15
+        0xF83800, // $16
+        0xE45C10, // $18
+        0xAC7C00, // $19
+        0x00B800, // $1A
+        0x00A800, // $1B
+        0x00A844, // $1C
+        0x008888, // $1D
+        0x000000, // $1E
+        0x000000, // $1F
+        0x000000, // $20
+        0xF8F8F8, // $21
+        0x3CBCFC, // $22
+        0x6888FC, // $23
+        0x9878F8, // $24
+        0xF878F8, // $25
+        0xF85898, // $26
+        0xF87858, // $27
+        0xFCA044, // $28
+        0xF8B800, // $29
+        0xB8F818, // $2A
+        0x58D854, // $2B
+        0x58F898, // $2C
+        0x00E8D8, // $2D
+        0x787878, // $2E
+        0x000000, // $2F
+        0x000000, // $30
+        0xFCFCFC, // $31
+        0xA4E4FC, // $32
+        0xB8B8F8, // $33
+        0xD8B8F8, // $34
+        0xF8B8F8, // $35
+        0xF8A4C0, // $36
+        0xF0D0B0, // $37
+        0xFCE0A8, // $38
+        0xF8D878, // $39
+        0xD8F878, // $3A
+        0xB8F8B8, // $3B
+        0xB8F8D8, // $3C
+        0x00FCFC, // $3D
+        0xF8D8F8, // $3E
+        0x000000, // $3F
+        0x000000, // $40
+    };
+}
+#pragma once

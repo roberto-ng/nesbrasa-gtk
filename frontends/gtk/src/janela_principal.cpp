@@ -16,12 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
+#include "nesbrasa.gtk.hpp"
+
 #include <limits.h>
-#include <gtkmm.h>
-#include <glib.h>
 
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
@@ -30,9 +27,7 @@
 #elif defined(_WIN32)
 #include <windows.h>
 #endif
-
-#include "arquivo.hpp"
-#include "janela_principal.hpp"
+#include <fstream>
 
 namespace nesbrasa::gui
 {
@@ -42,6 +37,7 @@ namespace nesbrasa::gui
     using std::exception;
     using std::ifstream;
     using std::ofstream;
+    using namespace std::string_literals;
     using nucleo::Botao;
     using namespace std::string_literals;
 
@@ -113,6 +109,8 @@ namespace nesbrasa::gui
         this->builder->get_widget("barra_mi_sair", this->barra_mi_sair);
         this->builder->get_widget("barra_mi_configuracoes", this->barra_mi_configuracoes);
         this->builder->get_widget("btn_abrir", this->btn_abrir);
+        this->builder->get_widget("btn_abrir_rom", this->btn_abrir_rom);
+        this->builder->get_widget("btn_configuracoes", this->btn_configuracoes);
         this->builder->get_widget("barra_mi_abrir", this->barra_mi_abrir);
 
         this->add(*this->raiz);
@@ -120,6 +118,10 @@ namespace nesbrasa::gui
 #if defined(_WIN32)
         // usar barra de menu no Windows
         this->barra_menu->show();
+#elif defined(__APPLE__)
+        // O menu da aplicação é publicado na barra de menus global do macOS.
+        this->barra_menu->hide();
+        this->set_decorated(true);
 #else
         // usar headerbar 
         this->set_titlebar(*this->headerbar);
@@ -127,6 +129,14 @@ namespace nesbrasa::gui
 #endif
 
         this->scroll->show_all_children();
+
+#if defined(_WIN32) || defined(__APPLE__)
+        this->btn_abrir_rom->show();
+        this->btn_configuracoes->show();
+#else
+        this->btn_abrir_rom->hide();
+        this->btn_configuracoes->hide();
+#endif
 
         this->set_title("Nesbrasa");
 
@@ -143,6 +153,8 @@ namespace nesbrasa::gui
         this->barra_mi_configuracoes->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::abrir_configuracoes));
 
         this->btn_abrir->signal_clicked().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
+        this->btn_abrir_rom->signal_clicked().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
+        this->btn_configuracoes->signal_clicked().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_abrir_configuracoes));
         this->barra_mi_abrir->signal_activate().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_clicar_btn_abrir));
 
         this->quadro->signal_draw().connect(sigc::mem_fun(*this, &JanelaPrincipal::ao_desenhar_quadro));
@@ -191,6 +203,11 @@ namespace nesbrasa::gui
                     string caminho = dialogo->get_filename();                    
                     auto arquivo = ler_arquivo(caminho);
                     nes->carregar_rom(arquivo);
+                    this->btn_abrir_rom->hide();
+                    this->btn_configuracoes->hide();
+                    this->quadro->grab_focus();
+                    this->ultimo_tempo_frame = 0;
+                    this->quadros_acumulados = 0.0;
 
                     break;
                 }
@@ -222,6 +239,11 @@ namespace nesbrasa::gui
     {
         // fechar janela
         this->close();
+    }
+
+    void JanelaPrincipal::ao_abrir_configuracoes()
+    {
+        this->abrir_configuracoes();
     }
 
     void JanelaPrincipal::carregar_configuracoes()
@@ -361,18 +383,48 @@ namespace nesbrasa::gui
     {
         if (!this->nes->programa_carregado())
         {
+            this->ultimo_tempo_frame = 0;
+            this->quadros_acumulados = 0.0;
             return G_SOURCE_CONTINUE;
         }
 
-        // dar foco ao quadro
-        this->quadro->grab_focus();
-        
-        // Nes::avancar executa uma instrução completa e retorna quantos
-        // ciclos de CPU ela consumiu. Avançar um número fixo de instruções
-        // fazia a emulação correr várias vezes mais rápido que um quadro.
-        this->nes->avancar_quadro();
+        // Use the monotonic frame-clock time as a pacing source instead of
+        // assuming that one display refresh equals one NES frame. This keeps
+        // the emulation speed independent of the monitor refresh rate.
+        constexpr double QUADROS_POR_SEGUNDO = 1789772.7272727273 / 29780.0;
+        constexpr double MAX_TEMPO_DECORRIDO = 0.25;
+        constexpr double MAX_QUADROS_ATRASADOS = 5.0;
 
-        this->quadro->queue_draw();
+        const gint64 tempo_atual = frame_clock->get_frame_time();
+        if (this->ultimo_tempo_frame == 0)
+        {
+            this->ultimo_tempo_frame = tempo_atual;
+            return G_SOURCE_CONTINUE;
+        }
+
+        double tempo_decorrido =
+            static_cast<double>(tempo_atual - this->ultimo_tempo_frame) / 1'000'000.0;
+        this->ultimo_tempo_frame = tempo_atual;
+
+        // Avoid a pause, debugger stop, or sleep causing an unbounded catch-up.
+        if (tempo_decorrido < 0.0)
+            tempo_decorrido = 0.0;
+        tempo_decorrido = std::min(tempo_decorrido, MAX_TEMPO_DECORRIDO);
+        this->quadros_acumulados = std::min(
+            this->quadros_acumulados + tempo_decorrido * QUADROS_POR_SEGUNDO,
+            MAX_QUADROS_ATRASADOS
+        );
+
+        bool atualizou = false;
+        while (this->quadros_acumulados >= 1.0)
+        {
+            this->nes->avancar_quadro();
+            this->quadros_acumulados -= 1.0;
+            atualizou = true;
+        }
+
+        if (atualizou)
+            this->quadro->queue_draw();
         return G_SOURCE_CONTINUE;
     }
 
@@ -423,20 +475,20 @@ namespace nesbrasa::gui
             pos_y = (altura - altura_escalada) / 2.0;
         }
 
-        auto textura_escalada = this->textura_tela->scale_simple(
-            largura_escalada, 
-            altura_escalada, 
-            Gdk::InterpType::INTERP_NEAREST
-        );
-
         // renderizar fundo
         auto estilo = this->quadro->get_style_context();
         estilo->render_background(cr, 0, 0, largura, altura);
 
-        // renderizar o buffer da tela
-        Gdk::Cairo::set_source_pixbuf(cr, textura_escalada, pos_x, pos_y);
-        cr->rectangle(pos_x, pos_y, textura_escalada->get_width(), textura_escalada->get_height());
+        // Renderizar o buffer diretamente com uma transformação do Cairo.
+        // Isso evita alocar e redimensionar um novo Pixbuf a cada quadro.
+        cr->save();
+        cr->translate(pos_x, pos_y);
+        cr->scale(escala, escala);
+        Gdk::Cairo::set_source_pixbuf(cr, this->textura_tela, 0, 0);
+        cairo_pattern_set_filter(cairo_get_source(cr->cobj()), CAIRO_FILTER_NEAREST);
+        cr->rectangle(0, 0, NES_TELA_LARGURA, NES_TELA_ALTURA);
         cr->fill();
+        cr->restore();
 
         return false;
     }
@@ -455,3 +507,4 @@ namespace nesbrasa::gui
         return false;
     }
 }
+

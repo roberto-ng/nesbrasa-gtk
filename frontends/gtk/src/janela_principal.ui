@@ -173,14 +173,48 @@
             <property name="hscroll_policy">natural</property>
             <property name="vscroll_policy">natural</property>
             <child>
-              <object class="GtkDrawingArea" id="quadro">
+              <object class="GtkOverlay" id="area_jogo">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="is_focus">True</property>
-                <property name="receives_default">True</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
+                <child>
+                  <object class="GtkDrawingArea" id="quadro">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="is_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                  </object>
+                </child>
+                <child type="overlay">
+                  <object class="GtkBox" id="empty_state_actions">
+                    <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">8</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <child>
+                      <object class="GtkButton" id="btn_abrir_rom">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Abrir ROM</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btn_configuracoes">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Configurações</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
+              <!-- The drawing area stays the viewport's actual content. -->
+              <!-- The overlay only provides the empty-state action. -->
             </child>
           </object>
         </child>
@@ -193,3 +227,4 @@
     </child>
   </object>
 </interface>
+

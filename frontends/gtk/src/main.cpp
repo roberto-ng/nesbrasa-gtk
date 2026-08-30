@@ -16,52 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(_WIN32)
-#include <windows.h>
-#endif
-
-#include <iostream>
-#include <gtkmm/object.h>
-#include <gtkmm/settings.h>
-
-#include "janela_principal.hpp"
-
-using namespace nesbrasa::gui;
-
-static const string APP_ID = "nesbrasa.nesbrasa.emu";
-
-static void ao_ativar(Glib::RefPtr<Gtk::Application> app)
-{
-    auto janela = app->get_active_window();
-    if (janela == nullptr)
-    {
-        // criar janela
-        janela = new JanelaPrincipal();
-        janela->property_application() = app;
-
-        app->add_window(*janela);
-    }
-
-#if defined(_WIN32)
-    // usar a barra de janela padrão do windows
-    SetEnvironmentVariable("GTK_CSD", "0");
-
-    auto tela = Gdk::Screen::get_default();    
-    if (tela.get() != nullptr)
-    {
-        // usar tema padrão do windows
-        auto configuracao = Gtk::Settings::get_for_screen(tela);
-        configuracao->property_gtk_theme_name() = "win32";
-    }
-#endif
-
-    janela->present();
-}
+#include "nesbrasa.gtk.hpp"
 
 int main(int argc, char* argv[])
 {
-    auto app = Gtk::Application::create(APP_ID, Gio::APPLICATION_FLAGS_NONE);
-    app->signal_activate().connect(sigc::bind(&ao_ativar, app));
-
-    return app->run(argc, argv);
+    return nesbrasa::gui::executar_aplicacao(argc, argv);
 }
+
