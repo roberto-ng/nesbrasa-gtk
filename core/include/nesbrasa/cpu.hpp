@@ -432,4 +432,3 @@ namespace nesbrasa::nucleo
 }
 
 #include <nesbrasa/cpu_instructions.hpp>
-#pragma once

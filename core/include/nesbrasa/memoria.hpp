@@ -77,4 +77,4 @@ namespace nesbrasa::nucleo
         }
     };
 }
-#pragma once
+
