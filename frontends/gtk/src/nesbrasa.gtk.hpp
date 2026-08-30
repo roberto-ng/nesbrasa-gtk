@@ -17,7 +17,6 @@ namespace nesbrasa::gui
     using std::string;
     using std::unique_ptr;
     using nesbrasa::nucleo::Nes;
-    using nesbrasa::tipos::uint32;
 
     class JanelaPrincipal : public Gtk::Window
     {
@@ -25,7 +24,8 @@ namespace nesbrasa::gui
         static const guint ALTURA;
         static const guint LARGURA;
         static const string RECURSO_CAMINHO;
-        Glib::RefPtr<Gdk::Pixbuf> textura_tela;
+        std::array<Cairo::RefPtr<Cairo::ImageSurface>, 2> superficies_textura;
+        std::array<const void*, 2> dados_textura = {};
         unique_ptr<Nes> nes;
         Glib::RefPtr<Gtk::Builder> builder;
         Gtk::HeaderBar* headerbar;
@@ -63,4 +63,3 @@ namespace nesbrasa::gui
     std::vector<nesbrasa::tipos::byte> ler_arquivo(string caminho);
     int executar_aplicacao(int argc, char* argv[]);
 }
-

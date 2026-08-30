@@ -96,7 +96,6 @@ namespace nesbrasa::gui
         this->teclas = TECLAS_PADRAO;
         this->caminho_configuracao = obter_diretorio_executavel() / "nesbrasa-controls.conf";
         this->carregar_configuracoes();
-        this->textura_tela = Gdk::Pixbuf::create(Gdk::Colorspace::COLORSPACE_RGB, false, 8, NES_TELA_LARGURA, NES_TELA_ALTURA);
 
         this->builder = Gtk::Builder::create_from_resource(RECURSO_CAMINHO);
         this->builder->get_widget("raiz", this->raiz);
@@ -436,14 +435,7 @@ namespace nesbrasa::gui
             return false;
         }
 
-        auto pixels = this->textura_tela->get_pixels();
         const auto& textura = this->nes->get_textura();
-        for (uint i = 0; i < textura.size(); i++) {
-            uint32 valor = textura.at(i);
-            pixels[i*3 + 0] = (valor & 0xFF0000) >> 4*4;
-            pixels[i*3 + 1] = (valor & 0x00FF00) >> 4*2;
-            pixels[i*3 + 2] = (valor & 0x0000FF);
-        }
 
         const double largura = this->quadro->get_allocation().get_width();
         const double altura = this->quadro->get_allocation().get_height();
@@ -479,12 +471,51 @@ namespace nesbrasa::gui
         auto estilo = this->quadro->get_style_context();
         estilo->render_background(cr, 0, 0, largura, altura);
 
-        // Renderizar o buffer diretamente com uma transformação do Cairo.
-        // Isso evita alocar e redimensionar um novo Pixbuf a cada quadro.
+        // The framebuffer is packed as 0x00RRGGBB, which is the native
+        // little-endian memory layout expected by Cairo's RGB24 format.
+        // Rendering it directly avoids converting all 61,440 pixels every
+        // frame and also avoids an intermediate Gdk::Pixbuf.
+        const void* dados = textura.data();
+        Cairo::RefPtr<Cairo::ImageSurface> surface;
+        for (std::size_t i = 0; i < this->dados_textura.size(); ++i)
+        {
+            if (this->dados_textura[i] == dados)
+            {
+                surface = this->superficies_textura[i];
+                break;
+            }
+        }
+
+        if (!surface)
+        {
+            for (std::size_t i = 0; i < this->dados_textura.size(); ++i)
+            {
+                if (this->dados_textura[i] == nullptr)
+                {
+                    this->dados_textura[i] = dados;
+                    this->superficies_textura[i] = Cairo::ImageSurface::create(
+                        reinterpret_cast<unsigned char*>(const_cast<uint32_t*>(textura.data())),
+                        Cairo::FORMAT_RGB24,
+                        static_cast<int>(NES_TELA_LARGURA),
+                        static_cast<int>(NES_TELA_ALTURA),
+                        static_cast<int>(NES_TELA_LARGURA * sizeof(uint32_t)));
+                    surface = this->superficies_textura[i];
+                    break;
+                }
+            }
+        }
+
+        if (!surface)
+            return false;
+
+        surface->mark_dirty();
+        if (surface->get_status() != CAIRO_STATUS_SUCCESS)
+            return false;
+
         cr->save();
         cr->translate(pos_x, pos_y);
         cr->scale(escala, escala);
-        Gdk::Cairo::set_source_pixbuf(cr, this->textura_tela, 0, 0);
+        cr->set_source(surface, 0, 0);
         cairo_pattern_set_filter(cairo_get_source(cr->cobj()), CAIRO_FILTER_NEAREST);
         cr->rectangle(0, 0, NES_TELA_LARGURA, NES_TELA_ALTURA);
         cr->fill();
@@ -507,4 +538,3 @@ namespace nesbrasa::gui
         return false;
     }
 }
-
