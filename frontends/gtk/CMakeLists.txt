@@ -40,4 +40,3 @@ install(FILES data/nesbrasa.nesbrasa.emu.appdata.xml.in
 install(FILES data/nesbrasa.nesbrasa.emu.gschema.xml
     DESTINATION ${CMAKE_INSTALL_DATADIR}/glib-2.0/schemas
 )
-

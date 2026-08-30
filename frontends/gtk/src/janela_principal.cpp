@@ -427,7 +427,6 @@ namespace nesbrasa::gui
         return G_SOURCE_CONTINUE;
     }
 
-    // Função chamada quando é necessário renderizar o quadro.
     bool JanelaPrincipal::ao_desenhar_quadro(const Cairo::RefPtr<Cairo::Context>& cr)
     {
         if (!this->nes->programa_carregado())
@@ -436,45 +435,17 @@ namespace nesbrasa::gui
         }
 
         const auto& textura = this->nes->get_textura();
-
         const double largura = this->quadro->get_allocation().get_width();
         const double altura = this->quadro->get_allocation().get_height();
+        if (largura <= 0 || altura <= 0)
+            return true;
 
-        double escala = 0;
-        double largura_escalada = 0;
-        double altura_escalada = 0;
-        double pos_x = 0;
-        double pos_y = 0;
+        const double escala = std::min(largura / NES_TELA_LARGURA, altura / NES_TELA_ALTURA);
+        const double largura_escalada = NES_TELA_LARGURA * escala;
+        const double altura_escalada = NES_TELA_ALTURA * escala;
+        const double pos_x = (largura - largura_escalada) / 2.0;
+        const double pos_y = (altura - altura_escalada) / 2.0;
 
-        if (largura > altura)
-        {
-            // se a largura for maior ou igual que a altura
-            escala = altura/NES_TELA_ALTURA;
-            largura_escalada = NES_TELA_LARGURA*escala;
-            altura_escalada = altura;
-            
-            // centralizar horizontalmente
-            pos_x = (largura - largura_escalada) / 2.0;
-        }
-        else
-        {
-            // se a altura for maior que a largura 
-            escala = largura/NES_TELA_LARGURA;
-            largura_escalada = largura;
-            altura_escalada = NES_TELA_ALTURA*escala;
-            
-            // centralizar verticalmente
-            pos_y = (altura - altura_escalada) / 2.0;
-        }
-
-        // renderizar fundo
-        auto estilo = this->quadro->get_style_context();
-        estilo->render_background(cr, 0, 0, largura, altura);
-
-        // The framebuffer is packed as 0x00RRGGBB, which is the native
-        // little-endian memory layout expected by Cairo's RGB24 format.
-        // Rendering it directly avoids converting all 61,440 pixels every
-        // frame and also avoids an intermediate Gdk::Pixbuf.
         const void* dados = textura.data();
         Cairo::RefPtr<Cairo::ImageSurface> surface;
         for (std::size_t i = 0; i < this->dados_textura.size(); ++i)
@@ -485,7 +456,6 @@ namespace nesbrasa::gui
                 break;
             }
         }
-
         if (!surface)
         {
             for (std::size_t i = 0; i < this->dados_textura.size(); ++i)
@@ -504,15 +474,15 @@ namespace nesbrasa::gui
                 }
             }
         }
-
         if (!surface)
             return false;
-
         surface->mark_dirty();
         if (surface->get_status() != CAIRO_STATUS_SUCCESS)
             return false;
 
         cr->save();
+        auto estilo = this->quadro->get_style_context();
+        estilo->render_background(cr, 0, 0, largura, altura);
         cr->translate(pos_x, pos_y);
         cr->scale(escala, escala);
         cr->set_source(surface, 0, 0);
@@ -520,8 +490,7 @@ namespace nesbrasa::gui
         cr->rectangle(0, 0, NES_TELA_LARGURA, NES_TELA_ALTURA);
         cr->fill();
         cr->restore();
-
-        return false;
+        return true;
     }
 
     bool JanelaPrincipal::ao_pressionar_tecla(GdkEventKey* evento)
