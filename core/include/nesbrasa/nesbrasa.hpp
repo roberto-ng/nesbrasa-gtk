@@ -1,67 +1,41 @@
-/* nesbrasa.hpp
- *
- * Copyright 2019 Roberto Nazareth <nazarethroberto97@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
-
-#include <cstdint>
+#include <nesbrasa/controle.hpp>
+#include <nesbrasa/memoria.hpp>
+#include <nesbrasa/cpu.hpp>
+#include <nesbrasa/ppu.hpp>
+#include <string>
+#include <sstream>
+#include <iostream>
 #include <array>
-#include <vector>
 #include <memory>
-
-#include "cpu.hpp"
-#include "ppu.hpp"
-#include "memoria.hpp"
-#include "mapeadores/cartucho.hpp"
-#include "controle.hpp"
+#include <vector>
+#include <nesbrasa/util.hpp>
+#include <nesbrasa/mapeadores/nrom.hpp>
+#include <nesbrasa/ports.hpp>
 
 namespace nesbrasa::nucleo
 {
-    using std::array;
-    using std::vector;
-    using std::unique_ptr;
-    using namespace mapeadores;
-
-    class Nes
+    class Nes : public InterruptSink, public DmaSink
     {
     public:
         static constexpr int TELA_LARGURA = 256;
         static constexpr int TELA_ALTURA = 240;
         static constexpr int CICLOS_POR_QUADRO = 29780;
-
         Memoria memoria;
-        
         Cpu cpu;
         Ppu ppu;
-        
-        Controle controle_1;
-        Controle controle_2;
-        
-        unique_ptr<Cartucho> cartucho;
-        
+        Controle controle_1, controle_2;
+        std::unique_ptr<mapeadores::Cartucho> cartucho;
         bool is_programa_carregado;
-        
         Nes();
-
-        void carregar_rom(vector<byte> arquivo);
+        void carregar_rom(std::vector<tipos::byte> arquivo);
         int avancar();
         int avancar_quadro();
-        const array<uint32, (256 * 240)>& get_textura() const;
+        const std::array<tipos::uint32, 256 * 240>& get_textura() const;
         void set_botao(Botao botao, bool pressionado);
         bool programa_carregado() const;
+        void ativar_interrupcao(Interrupcao) override;
+        void solicitar_dma(tipos::byte) override;
     };
 }
+

@@ -1,44 +1,29 @@
-/* nesbrasa.cpp
- *
- * Copyright 2019 Roberto Nazareth <nazarethroberto97@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+#include <nesbrasa/nesbrasa.hpp>
 
-#include <string>
-#include <sstream>
-#include <iostream>
-
-#include "nesbrasa.hpp"
-#include "mapeadores/nrom.hpp"
-#include "util.hpp"
+using namespace nesbrasa::tipos;
 
 namespace nesbrasa::nucleo
 {
     using std::make_unique;
     using std::stringstream;
     using std::runtime_error;
+    using std::array;
+    using std::vector;
+    using std::string;
     using namespace std::string_literals;
     using namespace mapeadores;
 
     Nes::Nes(): 
-        memoria(this),
+        memoria(),
         cpu(&this->memoria),
-        ppu(&this->memoria)
+        ppu(&this->memoria, nullptr, this, this)
     {
+        mapeadores::registrar_nrom();
+        this->memoria.configurar(&this->ppu, &this->controle_1, &this->controle_2, nullptr, this);
         this->is_programa_carregado = false;
         this->cartucho = nullptr;
+        this->memoria.configurar(&this->ppu, &this->controle_1, &this->controle_2, nullptr, this);
+        this->ppu.configurar_cartucho(nullptr);
     }
 
     void Nes::carregar_rom(vector<byte> arquivo)
@@ -95,6 +80,8 @@ namespace nesbrasa::nucleo
         auto cartucho_tipo = static_cast<CartuchoTipo>(mapeador_codigo);
         // Usar o método factory da classe Cartucho para criar o objeto do cartucho
         this->cartucho = Cartucho::criar(cartucho_tipo, prg_qtd, chr_qtd, arquivo, formato, espelhamento);
+        this->memoria.configurar(&this->ppu, &this->controle_1, &this->controle_2, this->cartucho.get(), this);
+        this->ppu.configurar_cartucho(this->cartucho.get());
 
         //TODO: Completar suporte a ROMs no formato NES 2.0
         this->is_programa_carregado = true;
@@ -141,5 +128,19 @@ namespace nesbrasa::nucleo
     bool Nes::programa_carregado() const
     {
         return this->is_programa_carregado;
+    }
+
+    void Nes::ativar_interrupcao(Interrupcao interrupcao)
+    {
+        this->cpu.interrupcao = interrupcao;
+    }
+
+    void Nes::solicitar_dma(byte)
+    {
+        this->cpu.esperar_adicionar(513);
+        if ((this->cpu.get_ciclos() % 2) == 1)
+        {
+            this->cpu.esperar_adicionar(1);
+        }
     }
 }

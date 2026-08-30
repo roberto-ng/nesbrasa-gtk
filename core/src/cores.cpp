@@ -1,4 +1,7 @@
-#include "cores.hpp"
+#include <nesbrasa/cores.hpp>
+
+using namespace nesbrasa::tipos;
+using std::array;
 
 namespace nesbrasa::nucleo::cores
 {
@@ -70,3 +73,4 @@ namespace nesbrasa::nucleo::cores
         0x000000, // $40
     };
 }
+

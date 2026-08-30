@@ -1,5 +1,6 @@
 {
-    "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "C_Cpp.intelliSenseEngine": "Disabled",
+    "clangd.path": "/opt/homebrew/opt/llvm/bin/clangd",
     "files.associations": {
         "cctype": "cpp",
         "clocale": "cpp",
@@ -61,3 +62,4 @@
         "iomanip": "cpp"
     }
 }
+

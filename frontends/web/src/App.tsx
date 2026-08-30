@@ -68,6 +68,17 @@ export default function App() {
   const [wasm, setWasm] = createSignal<WasmModule>();
   const [fullscreen, setFullscreen] = createSignal(false);
   let frameRequest = 0;
+  let ultimoTempo: number | undefined;
+  let quadrosAcumulados = 0;
+  let imagem: ImageData | undefined;
+  const QUADROS_POR_SEGUNDO = 1789772.7272727273 / 29780;
+  const MAX_TEMPO_DECORRIDO = 0.25;
+  const MAX_QUADROS_ATRASADOS = 5;
+
+  const resetTiming = () => {
+    ultimoTempo = undefined;
+    quadrosAcumulados = 0;
+  };
 
   const persistControls = (next: Record<ControlId, string>) => {
     setControlsState(next);
@@ -101,21 +112,51 @@ export default function App() {
     emulator()!.set_botao(control.button, pressed);
   };
 
-  const draw = () => {
+  // requestAnimationFrame supplies a monotonic, high-resolution timestamp.
+  // The accumulator decouples emulation speed from the display refresh rate.
+  const draw = (tempoAtual: number) => {
     const nes = emulator();
     const module = wasm();
-    if (!nes || !module || !canvas || paused() || !nes.programa_carregado()) return;
-    nes.avancar_quadro();
-    const pixels = new Uint32Array(module.HEAPU32.buffer, nes.framebuffer_ptr(), 256 * 240);
-    const context = canvas.getContext('2d', { alpha: false })!;
-    const image = context.createImageData(256, 240);
-    for (let i = 0; i < pixels.length; i += 1) {
-      image.data[i * 4] = (pixels[i] >> 16) & 0xff;
-      image.data[i * 4 + 1] = (pixels[i] >> 8) & 0xff;
-      image.data[i * 4 + 2] = pixels[i] & 0xff;
-      image.data[i * 4 + 3] = 255;
+    if (!nes || !module || !canvas || paused() || !nes.programa_carregado()) {
+      resetTiming();
+      return;
     }
-    context.putImageData(image, 0, 0);
+
+    if (ultimoTempo === undefined) {
+      ultimoTempo = tempoAtual;
+      frameRequest = requestAnimationFrame(draw);
+      return;
+    }
+
+    const tempoDecorrido = Math.max(
+      0,
+      Math.min((tempoAtual - ultimoTempo) / 1000, MAX_TEMPO_DECORRIDO),
+    );
+    ultimoTempo = tempoAtual;
+    quadrosAcumulados = Math.min(
+      quadrosAcumulados + tempoDecorrido * QUADROS_POR_SEGUNDO,
+      MAX_QUADROS_ATRASADOS,
+    );
+
+    let atualizou = false;
+    while (quadrosAcumulados >= 1) {
+      nes.avancar_quadro();
+      quadrosAcumulados -= 1;
+      atualizou = true;
+    }
+
+    if (atualizou) {
+      const pixels = new Uint32Array(module.HEAPU32.buffer, nes.framebuffer_ptr(), 256 * 240);
+      const context = canvas.getContext('2d', { alpha: false })!;
+      imagem ??= context.createImageData(256, 240);
+      for (let i = 0; i < pixels.length; i += 1) {
+        imagem.data[i * 4] = (pixels[i] >> 16) & 0xff;
+        imagem.data[i * 4 + 1] = (pixels[i] >> 8) & 0xff;
+        imagem.data[i * 4 + 2] = pixels[i] & 0xff;
+        imagem.data[i * 4 + 3] = 255;
+      }
+      context.putImageData(imagem, 0, 0);
+    }
     frameRequest = requestAnimationFrame(draw);
   };
 
@@ -127,6 +168,7 @@ export default function App() {
       setStatus(`ROM: ${file.name}`);
       setPaused(false);
       cancelAnimationFrame(frameRequest);
+      resetTiming();
       frameRequest = requestAnimationFrame(draw);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Unable to load ROM');
@@ -164,7 +206,13 @@ export default function App() {
         <h1>Nesbrasa</h1>
         <Show when={view() === 'play'}>
           <label class="file-button">Open ROM<input type="file" accept=".nes" onChange={loadRom} /></label>
-          <button type="button" disabled={!emulator()?.programa_carregado()} onClick={() => { setPaused(!paused()); if (paused()) frameRequest = requestAnimationFrame(draw); }}>
+          <button type="button" disabled={!emulator()?.programa_carregado()} onClick={() => {
+            const shouldPause = !paused();
+            setPaused(shouldPause);
+            cancelAnimationFrame(frameRequest);
+            resetTiming();
+            if (!shouldPause) frameRequest = requestAnimationFrame(draw);
+          }}>
             {paused() ? 'Resume' : 'Pause'}
           </button>
           <output>{status()}</output>
@@ -200,3 +248,4 @@ export default function App() {
     </main>
   );
 }
+

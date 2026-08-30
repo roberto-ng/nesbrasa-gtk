@@ -1,58 +1,27 @@
-/* memoria.hpp
- *
- * Copyright 2019 Roberto Nazareth <nazarethroberto97@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
-
-#include <cstdint>
 #include <array>
-
-#include "tipos_numeros.hpp"
+#include <nesbrasa/tipos_numeros.hpp>
+#include <nesbrasa/ports.hpp>
 
 namespace nesbrasa::nucleo
 {
-    using std::array;
-    using namespace tipos;
-        
-    class Nes;
-    enum class Interrupcao;
-
-    class Memoria
+    class Memoria : public CpuBus
     {
-    private:
-        array<byte, 0x0800> ram; 
-        
-    public:        
-        Nes* nes;
-        
-        Memoria(Nes* nes);
+        std::array<tipos::byte, 0x0800> ram;
+        PpuPort* ppu;
+        ControllerPort* controle_1;
+        ControllerPort* controle_2;
+        CartridgePort* cartucho;
+        InterruptSink* interrupcoes;
 
-        //! Lê um valor de 8 bits na memoria
-        byte ler(uint16 endereco);
-
-        //! Lê um valor de 16 bits na memoria
-        uint16 ler_16_bits(uint16 endereco);
-
-        //! Lê um valor de 16 bits na memoria do no modo indireto da cpu reproduzindo um bug da CPU
-        uint16 ler_16_bits_bug(uint16 endereco);
-
-        //! Escreve um valor na memoria
-        void escrever(uint16 endereco, byte valor);
-
-        void cpu_ativar_interrupcao(Interrupcao interrupcao);
+    public:
+        Memoria();
+        void configurar(PpuPort*, ControllerPort*, ControllerPort*, CartridgePort*, InterruptSink*);
+        tipos::byte ler(tipos::uint16) override;
+        tipos::uint16 ler_16_bits(tipos::uint16) override;
+        tipos::uint16 ler_16_bits_bug(tipos::uint16) override;
+        void escrever(tipos::uint16, tipos::byte) override;
+        void cpu_ativar_interrupcao(Interrupcao);
     };
 }
+

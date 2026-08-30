@@ -3,8 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <nesbrasa.hpp>
-
+#include <nesbrasa/nesbrasa.hpp>
 namespace
 {
     using nesbrasa::nucleo::Botao;
@@ -53,3 +52,4 @@ EMSCRIPTEN_BINDINGS(nesbrasa_web)
         .function("programa_carregado", &WebNes::programa_carregado)
         .function("set_botao", &WebNes::set_botao);
 }
+
