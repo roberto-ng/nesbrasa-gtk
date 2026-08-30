@@ -25,9 +25,6 @@ namespace nesbrasa::nucleo
         InstrucaoOperacao operacao;
         Instrucao(std::string nome, tipos::byte bytes, tipos::int32 ciclos,
                   tipos::int32 ciclos_pag_alt, InstrucaoModo modo,
-                  InstrucaoOperacao operacao):
-            nome(nome), bytes(bytes), ciclos(ciclos), ciclos_pag_alt(ciclos_pag_alt),
-            modo(modo), operacao(operacao) {}
+                  InstrucaoOperacao operacao);
     };
 }
-#pragma once

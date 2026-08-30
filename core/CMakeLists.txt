@@ -2,6 +2,13 @@ add_library(nesbrasa SHARED
     src/nesbrasa.cpp
     src/cores.cpp
     src/util.cpp
+    src/controle.cpp
+    src/cpu.cpp
+    src/instrucao.cpp
+    src/memoria.cpp
+    src/ppu.cpp
+    src/mapeadores/cartucho.cpp
+    src/mapeadores/nrom.cpp
 )
 
 set_target_properties(nesbrasa PROPERTIES
