@@ -121,6 +121,14 @@ namespace nesbrasa::gui
         barra->setMovable(false);
         barra->addAction(abrir);
         barra->addAction(configuracoes);
+#if defined(Q_OS_MACOS)
+        // On macOS, QMainWindow toolbars otherwise become an in-window strip
+        // beneath the title bar. Keep the actions in the native application
+        // menu instead, matching normal macOS window behavior.
+        menuBar()->setNativeMenuBar(true);
+        setUnifiedTitleAndToolBarOnMac(true);
+        barra->hide();
+#endif
 
         paginas = new QStackedWidget(this);
         quadro = new Quadro(nes.get(), this);
